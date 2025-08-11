@@ -18,19 +18,24 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Build And Deploy
+      
+      # This is our new "dummy" build step
+      - name: Build App
+        run: |
+          mkdir public
+          cp index.html public/index.html
+          cp staticwebapp.config.json public/staticwebapp.config.json
+
+      - name: Deploy to Azure
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_ROCK_0689A5810 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### Repository/Build Configurations ######
-          app_location: "/" 
-          api_location: "" 
-          output_location: "/" 
-          skip_app_build: true
-          ###### End of Repository/Build Configurations ######
+          app_location: "public" # Tell Azure the app is in the 'public' folder
+          api_location: ""
+          output_location: "" # Not needed anymore, but we'll leave it blank
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
