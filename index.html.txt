@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAM Industrial - Digital Attendance Sheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #signature-pad {
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            cursor: crosshair;
+        }
+        ::placeholder {
+            color: #94a3b8;
+        }
+        input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        input[type="checkbox"]:disabled {
+            background-color: #e5e7eb;
+            border-color: #d1d5db;
+            cursor: not-allowed;
+        }
+        button {
+            transition: all 0.2s ease-in-out;
+        }
+        /* Style for the select dropdown to match other inputs */
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        /* Ensure table layout is fixed to respect column widths */
+        .table-fixed {
+            table-layout: fixed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto max-w-screen-2xl p-4 sm:p-6 lg:p-8">
+        <!-- Header Section -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+                <img src="https://i.imgur.com/O1hP4yT.png" alt="CAM Industrial Solutions Logo" class="h-12 mb-4 sm:mb-0" onerror="this.onerror=null;this.src='https://placehold.co/200x50/003366/FFFFFF?text=CAM+Logo';">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Digital Attendance Sheet</h1>
+            </div>
+
+            <!-- Header Information Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
+                <div class="flex flex-col">
+                    <label for="project" class="text-sm font-medium text-gray-600 mb-1">Project / Job #</label>
+                    <input type="text" id="project" placeholder="e.g., Coker Unit Turnaround" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                <div class="flex flex-col">
+                    <label for="date" class="text-sm font-medium text-gray-600 mb-1">Date</label>
+                    <input type="date" id="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                <div class="flex flex-col">
+                    <label for="outage" class="text-sm font-medium text-gray-600 mb-1">Outage</label>
+                    <input type="text" id="outage" placeholder="e.g., Spring 2025" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                <div class="flex flex-col">
+                    <label for="manager" class="text-sm font-medium text-gray-600 mb-1">Manager</label>
+                    <input type="text" id="manager" placeholder="Manager's Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                <div class="flex flex-col">
+                    <label for="supervisor" class="text-sm font-medium text-gray-600 mb-1">Supervisor</label>
+                    <input type="text" id="supervisor" placeholder="Supervisor's Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                 <div class="flex flex-col">
+                    <label for="foreperson" class="text-sm font-medium text-gray-600 mb-1">Foreperson</label>
+                    <input type="text" id="foreperson" placeholder="Foreperson's Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+            </div>
+        </div>
+
+        <!-- Crew Members Table -->
+        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Crew Sign-In</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600 table-fixed">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 w-40">Area Worked</th>
+                            <th scope="col" class="px-4 py-3 w-52">Name (First/Last)</th>
+                            <th scope="col" class="px-4 py-3 w-32">Suncor ID</th>
+                            <th scope="col" class="px-4 py-3 w-64">Classification</th>
+                            <th scope="col" class="px-4 py-3 w-28 text-center">Signature</th>
+                            <th scope="col" class="px-4 py-3 w-16 text-center">Late</th>
+                            <th scope="col" class="px-4 py-3 w-16 text-center">Absent</th>
+                            <th scope="col" class="px-4 py-3 w-20 text-center">Training</th>
+                            <th scope="col" class="px-4 py-3 w-16 text-center">Camp</th>
+                            <th scope="col" class="px-4 py-3 w-16 text-center">Town</th>
+                            <th scope="col" class="px-4 py-3 w-16 text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="crew-table-body">
+                        <!-- Rows will be added here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-start mt-4">
+                <button id="add-row-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
+                    + Add Crew Member
+                </button>
+            </div>
+        </div>
+
+        <!-- Submission Section -->
+        <div class="mt-6 flex justify-end">
+            <button id="submit-all-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
+                Submit All Records
+            </button>
+        </div>
+    </div>
+
+    <!-- Signature Modal -->
+    <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto">
+            <h3 class="text-xl font-bold mb-4">Provide Signature</h3>
+            <canvas id="signature-pad" width="400" height="200"></canvas>
+            <div class="flex justify-between mt-4">
+                <button id="clear-signature-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Clear</button>
+                <button id="save-signature-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Save Signature</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Message Modal -->
+    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-11/12 max-w-md mx-auto text-center">
+            <h3 id="message-title" class="text-2xl font-bold mb-4"></h3>
+            <p id="message-text" class="text-gray-700 mb-6"></p>
+            <button id="message-ok-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">OK</button>
+        </div>
+    </div>
+
+
+    <script>
+        (() => {
+            // --- PRE-POPULATED CREW ROSTER ---
+            const crewRoster = [
+                { name: 'Campbell, Adam', suncorId: '90152831', classification: 'Iron Worker (ST) Journeyman', location: 'Camp' },
+                { name: 'Jeong, Yeongcheol', suncorId: '90412650', classification: 'Pipefitter Journeyman Alloy Welder', location: 'Camp' },
+                { name: 'Power, Kevin', suncorId: '66014', classification: 'Senior Superintendent, Site Maintenance', location: 'Town' },
+                { name: 'Macdonald, Allan', suncorId: '90157664', classification: 'Labourer Journeyman', location: 'Town' },
+                { name: 'Rabbit, Lawrence', suncorId: '90151443', classification: 'Boilermaker Journeyman Welder', location: 'Camp' },
+                { name: 'Walsh, Saranne', suncorId: '90124091', classification: 'Millwright Apprentice 4', location: 'Town' },
+                { name: 'Ozolins, Rollie', suncorId: '90159315', classification: 'Pipefitter General Foreman Cert.', location: 'Town' },
+                { name: 'Hutsulak, Richard', suncorId: '90428404', classification: 'Boilermaker Journeyman Welder', location: 'Camp' },
+                { name: 'Antle, Chris', suncorId: '90151350', classification: 'Superintendent, Site Maintenance', location: 'Town' },
+                { name: 'Martin, Trina', suncorId: '66449', classification: 'Senior Project Control Specialist', location: 'Town' },
+                { name: 'Keating, William', suncorId: '90159400', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Ok, Minwook', suncorId: '90412648', classification: 'Pipefitter Journeyman Alloy Welder', location: 'Camp' },
+                { name: 'Hickey, Robert', suncorId: '90412647', classification: 'Pipefitter Journeyman Alloy Welder', location: 'Camp' },
+                { name: 'Parsons, Joshua', suncorId: '90159401', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Macneil, Ryan', suncorId: '90151405', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Mccarron, Brett', suncorId: '90151408', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Benoit, Matthew', suncorId: '90151359', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Emberley, Justin', suncorId: '90151375', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'White, Stephen', suncorId: '90151439', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Drover, Christopher', suncorId: '90151373', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Caines, Gregory', suncorId: '90151366', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Noseworthy, Cody', suncorId: '90151415', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Heffernan, Michael', suncorId: '90151387', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Durnford, Johnathon', suncorId: '90151374', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Butt, Justin', suncorId: '90151365', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Smith, Jesse', suncorId: '90151428', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hiscock, David', suncorId: '90151392', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Russell, Cody', suncorId: '90151424', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hillier, Andrew', suncorId: '90151390', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Clarke, Andrew', suncorId: '90151368', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Lee, Gyeong Min', suncorId: '90412649', classification: 'Pipefitter Journeyman Alloy Welder', location: 'Camp' },
+                { name: 'Gillingham, Gregory', suncorId: '90151381', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Clarke, Jordan', suncorId: '90151369', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hiscock, Jonathan', suncorId: '90151393', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Leonard, Christopher', suncorId: '90151401', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Harnum, Christopher', suncorId: '90151384', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'May, Mitchell', suncorId: '90151407', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'King, Jordan', suncorId: '90151398', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Buckle, Daniel', suncorId: '90151364', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Barron, Adam', suncorId: '90151356', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Lee, Mitchell', suncorId: '90151400', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Barrett, Joshua', suncorId: '90151355', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Langer, Jordan', suncorId: '90151399', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Reid, Sheldon', suncorId: '90151422', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Reid, Adam', suncorId: '90151421', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Ward, Joshua', suncorId: '90151437', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Doyle, Brandon', suncorId: '90151372', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Noseworthy, Jordan', suncorId: '90151416', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Stone, Ryan', suncorId: '90151431', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hartery, Brandon', suncorId: '90151385', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Power, Mitchell', suncorId: '90151419', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Slaney, Corey', suncorId: '90151427', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Critch, Andrew', suncorId: '90151371', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hodder, Ryan', suncorId: '90151394', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hicks, Adam', suncorId: '90151389', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hiscock, Joshua', suncorId: '90151391', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Boland, Zachary', suncorId: '90151362', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Kelly, Andrew', suncorId: '90151397', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hynes, Kyle', suncorId: '90151396', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Barron, Joshua', suncorId: '90151357', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Pardy, Brandon', suncorId: '90151417', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Samson, Gregory', suncorId: '90151425', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Hillyard, Cody', suncorId: '90151388', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Greene, Devon', suncorId: '90151383', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Strickland, Brandon', suncorId: '90151432', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Careen, Brandon', suncorId: '90151367', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Mercer, Jordan', suncorId: '90151410', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Smith, Evan', suncorId: '90151429', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Wicks, Brandon', suncorId: '90151440', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Dalton, Joshua', suncorId: '90151370', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Sooley, Brandon', suncorId: '90151430', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Tarrant, Brandon', suncorId: '90151434', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Petten, Ryan', suncorId: '90151418', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Morgan, Riley', suncorId: '90151412', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Morgan, Nicholas', suncorId: '90151411', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Sturge, Joshua', suncorId: '90151433', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Walsh, Brandon', suncorId: '90151435', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Walsh, Adam', suncorId: '90151436', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Taylor, Evan', suncorId: '90151435', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Thomas, Jordan', suncorId: '90151438', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Pinsent, Jordan', suncorId: '90151420', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Seward, Zachary', suncorId: '90151426', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Bishop, Brandon', suncorId: '90151360', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Bishop, Riley', suncorId: '90151361', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Gosse, Brandon', suncorId: '90151382', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Murrins, Brandon', suncorId: '90151413', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Murrins, Tyler', suncorId: '90151414', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Newhook, Brandon', suncorId: '90151414', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Barnes, Jordan', suncorId: '90151354', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Boland, Brandon', suncorId: '90151363', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Gosse, Jordan', suncorId: '90159402', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Gosse, Riley', suncorId: '90159403', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Clarke, Brandon', suncorId: '90159404', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Reid, Brandon', suncorId: '90159405', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Reid, Riley', suncorId: '90159406', classification: 'Pipefitter Journeyman', location: 'Town' },
+                { name: 'Ristoski, Mihail', suncorId: '90100998', classification: 'Boilermaker Journeyman Welder', location: 'Camp' },
+                { name: 'Donecz, Aedyn', suncorId: '90451309', classification: 'Iron Worker (ST) Apprentice 1', location: 'Camp' },
+                { name: 'Lemmerick, Shane', suncorId: '90137981', classification: 'Iron Worker (ST) Journeyman Welder', location: 'Camp' },
+                { name: 'Rees, Christopher', suncorId: '66921', classification: 'Labourer Foreman Non Cert.', location: 'Town' },
+                { name: 'Lewis, Wade', suncorId: '90445995', classification: 'Iron Worker (ST) Journeyman', location: 'Camp' },
+                { name: 'Navas, Luis', suncorId: '583185', classification: 'Iron Worker (ST) Journeyman Welder', location: 'Camp' },
+                { name: 'Maiwka, John', suncorId: '90424339', classification: 'Boilermaker Apprentice Welder 1', location: 'Camp' },
+                { name: 'Fritzler, Kurtis', suncorId: '90207405', classification: 'Boilermaker Apprentice 2', location: 'Camp' },
+                { name: 'Kang, Peter', suncorId: '579300', classification: 'Boilermaker Journeyman Welder', location: 'Camp' },
+                { name: 'Murphy-Caines, Jade', suncorId: '728958', classification: 'Pipefitter Apprentice Welder 1', location: 'Camp' }
+            ].sort((a, b) => a.name.localeCompare(b.name)); // Sort the roster alphabetically by name
+
+            // --- DOM ELEMENT REFERENCES ---
+            const dateInput = document.getElementById('date');
+            const addRowBtn = document.getElementById('add-row-btn');
+            const crewTableBody = document.getElementById('crew-table-body');
+            const submitAllBtn = document.getElementById('submit-all-btn');
+            const signatureModal = document.getElementById('signature-modal');
+            const signaturePad = document.getElementById('signature-pad');
+            const clearSignatureBtn = document.getElementById('clear-signature-btn');
+            const saveSignatureBtn = document.getElementById('save-signature-btn');
+            const messageModal = document.getElementById('message-modal');
+            const messageTitle = document.getElementById('message-title');
+            const messageText = document.getElementById('message-text');
+            const messageOkBtn = document.getElementById('message-ok-btn');
+
+            // --- SIGNATURE PAD LOGIC ---
+            const ctx = signaturePad.getContext('2d');
+            let drawing = false;
+            let currentRowForSignature = null;
+
+            function getMousePos(canvas, evt) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const clientX = evt.clientX || (evt.touches && evt.touches[0].clientX);
+                const clientY = evt.clientY || (evt.touches && evt.touches[0].clientY);
+                return {
+                    x: (clientX - rect.left) * scaleX,
+                    y: (clientY - rect.top) * scaleY
+                };
+            }
+
+            function startDrawing(e) {
+                drawing = true;
+                const pos = getMousePos(signaturePad, e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+
+            function draw(e) {
+                if (!drawing) return;
+                e.preventDefault();
+                const pos = getMousePos(signaturePad, e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            function stopDrawing() {
+                drawing = false;
+                ctx.beginPath();
+            }
+            
+            function clearCanvas() {
+                ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
+            }
+
+            // --- MODAL & UI LOGIC ---
+            function openSignatureModal(row) {
+                currentRowForSignature = row;
+                clearCanvas();
+                signatureModal.classList.remove('hidden');
+            }
+
+            function closeSignatureModal() {
+                signatureModal.classList.add('hidden');
+                currentRowForSignature = null;
+            }
+            
+            function showMessage(title, text) {
+                messageTitle.textContent = title;
+                messageText.textContent = text;
+                messageModal.classList.remove('hidden');
+            }
+
+            // --- DATA & TABLE LOGIC ---
+            function addCrewRow() {
+                const rowId = `row-${Date.now()}`;
+                const row = document.createElement('tr');
+                row.id = rowId;
+                row.className = 'bg-white border-b hover:bg-gray-50 align-middle';
+                
+                row.innerHTML = `
+                    <td class="px-4 py-2"><input type="text" placeholder="e.g., Unit 5" class="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2"></td>
+                    <td class="px-4 py-2 name-cell-container"></td>
+                    <td class="px-4 py-2"><input type="text" data-field="suncorId" placeholder="Suncor ID" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly></td>
+                    <td class="px-4 py-2"><input type="text" data-field="classification" placeholder="Classification" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly></td>
+                    <td class="px-4 py-2 text-center"><button class="sign-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded">Sign</button></td>
+                    <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isLate" class="form-checkbox"></td>
+                    <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isAbsent" class="form-checkbox"></td>
+                    <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isTraining" class="form-checkbox"></td>
+                    <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isCamp" class="form-checkbox"></td>
+                    <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isTown" class="form-checkbox"></td>
+                    <td class="px-4 py-2 text-center"><button class="delete-row-btn text-red-500 hover:text-red-700 font-bold">X</button></td>
+                `;
+                
+                const nameCellContainer = row.querySelector('.name-cell-container');
+                const nameSelect = document.createElement('select');
+                nameSelect.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2 form-select';
+                
+                let defaultOption = document.createElement('option');
+                defaultOption.textContent = 'Select a worker...';
+                defaultOption.value = '';
+                nameSelect.appendChild(defaultOption);
+
+                crewRoster.forEach(worker => {
+                    let option = document.createElement('option');
+                    option.textContent = worker.name;
+                    option.value = worker.name;
+                    nameSelect.appendChild(option);
+                });
+
+                let addNewOption = document.createElement('option');
+                addNewOption.textContent = '--- Add New Worker ---';
+                addNewOption.value = '_addNew_';
+                nameSelect.appendChild(addNewOption);
+                
+                nameCellContainer.appendChild(nameSelect);
+                crewTableBody.appendChild(row);
+                
+                row.querySelector('.sign-btn').addEventListener('click', () => openSignatureModal(row));
+                row.querySelector('.delete-row-btn').addEventListener('click', () => row.remove());
+                nameSelect.addEventListener('change', handleNameSelection);
+            }
+
+            function handleNameSelection(e) {
+                const selectedValue = e.target.value;
+                const parentRow = e.target.closest('tr');
+                const suncorIdInput = parentRow.querySelector('input[data-field="suncorId"]');
+                const classInput = parentRow.querySelector('input[data-field="classification"]');
+                const campCheckbox = parentRow.querySelector('input[data-field="isCamp"]');
+                const townCheckbox = parentRow.querySelector('input[data-field="isTown"]');
+
+                if (selectedValue === '_addNew_') {
+                    const textInput = document.createElement('input');
+                    textInput.type = 'text';
+                    textInput.placeholder = 'First/Last Name';
+                    textInput.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2';
+                    e.target.replaceWith(textInput);
+                    textInput.focus();
+                    
+                    suncorIdInput.value = '';
+                    classInput.value = '';
+                    suncorIdInput.readOnly = false;
+                    classInput.readOnly = false;
+                    suncorIdInput.classList.remove('bg-gray-100');
+                    classInput.classList.remove('bg-gray-100');
+                    
+                    campCheckbox.checked = false;
+                    townCheckbox.checked = false;
+                    campCheckbox.disabled = false;
+                    townCheckbox.disabled = false;
+
+                } else {
+                    const selectedWorker = crewRoster.find(w => w.name === selectedValue);
+                    if (selectedWorker) {
+                        suncorIdInput.value = selectedWorker.suncorId;
+                        classInput.value = selectedWorker.classification;
+                        suncorIdInput.readOnly = true;
+                        classInput.readOnly = true;
+                        suncorIdInput.classList.add('bg-gray-100');
+                        classInput.classList.add('bg-gray-100');
+
+                        campCheckbox.checked = selectedWorker.location === 'Camp';
+                        townCheckbox.checked = selectedWorker.location === 'Town';
+                        campCheckbox.disabled = true;
+                        townCheckbox.disabled = true;
+
+                    } else {
+                        suncorIdInput.value = '';
+                        classInput.value = '';
+                        suncorIdInput.readOnly = false;
+                        classInput.readOnly = false;
+                        suncorIdInput.classList.remove('bg-gray-100');
+                        classInput.classList.remove('bg-gray-100');
+
+                        campCheckbox.checked = false;
+                        townCheckbox.checked = false;
+                        campCheckbox.disabled = false;
+                        townCheckbox.disabled = false;
+                    }
+                }
+            }
+            
+            async function handleSubmit() {
+                const projectInput = document.getElementById('project');
+                if (!projectInput.value.trim()) {
+                    showMessage('Validation Error', 'Please enter a Project / Job # before submitting.');
+                    return;
+                }
+
+                const headerData = {
+                    project: projectInput.value,
+                    date: dateInput.value,
+                    outage: document.getElementById('outage').value,
+                    manager: document.getElementById('manager').value,
+                    supervisor: document.getElementById('supervisor').value,
+                    foreperson: document.getElementById('foreperson').value,
+                    submissionTimestamp: new Date().toISOString()
+                };
+
+                const allRows = crewTableBody.querySelectorAll('tr');
+                const crewData = [];
+
+                for (const row of allRows) {
+                    const nameControl = row.querySelector('.name-cell-container').children[0];
+                    const nameValue = nameControl.value;
+                    
+                    if (!nameValue.trim() || nameValue === '_addNew_') {
+                        showMessage('Validation Error', 'Every row must have a name selected or entered. Please fill in all names or remove empty rows.');
+                        return;
+                    }
+                    
+                    if (!row.dataset.signature) {
+                         showMessage('Validation Error', `A signature is missing for ${nameValue}. Please ensure every crew member signs.`);
+                         return;
+                    }
+
+                    const record = {
+                        areaWorked: row.querySelector('input[type="text"]').value,
+                        name: nameValue,
+                        suncorId: row.querySelector('input[data-field="suncorId"]').value,
+                        classification: row.querySelector('input[data-field="classification"]').value,
+                        signature: row.dataset.signature,
+                        isLate: row.querySelector('input[data-field="isLate"]').checked,
+                        isAbsent: row.querySelector('input[data-field="isAbsent"]').checked,
+                        isTraining: row.querySelector('input[data-field="isTraining"]').checked,
+                        isCamp: row.querySelector('input[data-field="isCamp"]').checked,
+                        isTown: row.querySelector('input[data-field="isTown"]').checked,
+                    };
+                    crewData.push(record);
+                }
+
+                if(crewData.length === 0) {
+                    showMessage('No Data', 'There are no crew records to submit.');
+                    return;
+                }
+
+                const finalPayload = {
+                    header: headerData,
+                    crew: crewData
+                };
+
+                console.log("Final Payload to be sent to Firebase:", finalPayload);
+                showMessage('Submission Successful (Mock)', 'Data has been prepared and logged to the console. Integrate Firebase to save it.');
+            }
+
+            // --- EVENT LISTENERS & INITIALIZATION ---
+            dateInput.valueAsDate = new Date();
+            addRowBtn.addEventListener('click', addCrewRow);
+            submitAllBtn.addEventListener('click', handleSubmit);
+            clearSignatureBtn.addEventListener('click', clearCanvas);
+            messageOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
+
+            saveSignatureBtn.addEventListener('click', () => {
+                if (!currentRowForSignature) return;
+                const signatureDataUrl = signaturePad.toDataURL('image/png');
+                currentRowForSignature.dataset.signature = signatureDataUrl;
+                
+                const signButton = currentRowForSignature.querySelector('.sign-btn');
+                signButton.textContent = 'Signed';
+                signButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+                signButton.classList.add('bg-green-500', 'cursor-not-allowed');
+                signButton.disabled = true;
+
+                closeSignatureModal();
+            });
+
+            signaturePad.addEventListener('mousedown', startDrawing);
+            signaturePad.addEventListener('mousemove', draw);
+            signaturePad.addEventListener('mouseup', stopDrawing);
+            signaturePad.addEventListener('mouseleave', stopDrawing);
+            signaturePad.addEventListener('touchstart', startDrawing);
+            signaturePad.addEventListener('touchmove', draw);
+            signaturePad.addEventListener('touchend', stopDrawing);
+
+            addCrewRow();
+        })();
+    </script>
+
+</body>
+</html>
