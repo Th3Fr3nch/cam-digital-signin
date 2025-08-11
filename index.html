@@ -6,6 +6,8 @@
     <title>CAM Industrial - Digital Attendance Sheet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -47,7 +49,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <div class="container mx-auto max-w-screen-2xl p-4 sm:p-6 lg:p-8">
+    <div id="form-container" class="container mx-auto max-w-screen-2xl p-4 sm:p-6 lg:p-8">
         <!-- Header Section -->
         <div class="bg-white p-6 rounded-xl shadow-md mb-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
@@ -117,9 +119,9 @@
         </div>
 
         <!-- Submission Section -->
-        <div class="mt-6 flex justify-end">
-            <button id="submit-all-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
-                Submit All Records
+        <div class="mt-6 flex justify-end space-x-4">
+             <button id="save-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
+                Save as PDF
             </button>
         </div>
     </div>
@@ -145,26 +147,7 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyA6-clzdL3fZTUhJVb9yAl8FmIA3zRHHcw",
-            authDomain: "cam-industrial-apps.firebaseapp.com",
-            projectId: "cam-industrial-apps",
-            storageBucket: "cam-industrial-apps.appspot.com",
-            messagingSenderId: "1032914764995",
-            appId: "1:1032914764995:web:6a99b7dc2d130e8ccc8e76"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
         // --- PRE-POPULATED CREW ROSTER ---
         const crewRoster = [
             { name: 'Campbell, Adam', suncorId: '90152831', classification: 'Iron Worker (ST) Journeyman', location: 'Camp' },
@@ -278,7 +261,7 @@
         const dateInput = document.getElementById('date');
         const addRowBtn = document.getElementById('add-row-btn');
         const crewTableBody = document.getElementById('crew-table-body');
-        const submitAllBtn = document.getElementById('submit-all-btn');
+        const savePdfBtn = document.getElementById('save-pdf-btn');
         const signatureModal = document.getElementById('signature-modal');
         const signaturePad = document.getElementById('signature-pad');
         const clearSignatureBtn = document.getElementById('clear-signature-btn');
@@ -458,79 +441,33 @@
             }
         }
         
-        async function handleSubmit() {
+        function handleSavePdf() {
             const projectInput = document.getElementById('project');
+            const dateInput = document.getElementById('date');
+            
             if (!projectInput.value.trim()) {
-                showMessage('Validation Error', 'Please enter a Project / Job # before submitting.');
+                showMessage('Cannot Save PDF', 'Please enter a Project / Job # before saving.');
                 return;
             }
 
-            const headerData = {
-                project: projectInput.value,
-                date: dateInput.value,
-                outage: document.getElementById('outage').value,
-                manager: document.getElementById('manager').value,
-                supervisor: document.getElementById('supervisor').value,
-                foreperson: document.getElementById('foreperson').value,
-                submissionTimestamp: new Date().toISOString()
+            const element = document.getElementById('form-container');
+            const filename = `${projectInput.value.replace(/[^a-z0-9]/gi, '_')}_${dateInput.value}.pdf`;
+            
+            const opt = {
+                margin:       0.5,
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
             };
 
-            const allRows = crewTableBody.querySelectorAll('tr');
-            const crewData = [];
-
-            for (const row of allRows) {
-                const nameControl = row.querySelector('.name-cell-container').children[0];
-                const nameValue = nameControl.value;
-                
-                if (!nameValue.trim() || nameValue === '_addNew_') {
-                    showMessage('Validation Error', 'Every row must have a name selected or entered. Please fill in all names or remove empty rows.');
-                    return;
-                }
-                
-                if (!row.dataset.signature) {
-                     showMessage('Validation Error', `A signature is missing for ${nameValue}. Please ensure every crew member signs.`);
-                     return;
-                }
-
-                const record = {
-                    areaWorked: row.querySelector('input[type="text"]').value,
-                    name: nameValue,
-                    suncorId: row.querySelector('input[data-field="suncorId"]').value,
-                    classification: row.querySelector('input[data-field="classification"]').value,
-                    signature: row.dataset.signature,
-                    isLate: row.querySelector('input[data-field="isLate"]').checked,
-                    isAbsent: row.querySelector('input[data-field="isAbsent"]').checked,
-                    isTraining: row.querySelector('input[data-field="isTraining"]').checked,
-                    isCamp: row.querySelector('input[data-field="isCamp"]').checked,
-                    isTown: row.querySelector('input[data-field="isTown"]').checked,
-                };
-                crewData.push(record);
-            }
-
-            if(crewData.length === 0) {
-                showMessage('No Data', 'There are no crew records to submit.');
-                return;
-            }
-
-            const finalPayload = {
-                header: headerData,
-                crew: crewData
-            };
-
-            // --- FIREBASE INTEGRATION POINT ---
-            try {
-                const docRef = await addDoc(collection(db, "daily_sign_ins"), finalPayload);
-                showMessage('Submission Successful', `The sign-in sheet has been saved to the database. Record ID: ${docRef.id}`);
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                showMessage('Submission Failed', 'There was an error saving the data. Please check the console and contact support.');
-            }
+            html2pdf().set(opt).from(element).save();
         }
 
         // --- EVENT LISTENERS & INITIALIZATION ---
         dateInput.valueAsDate = new Date();
         addRowBtn.addEventListener('click', addCrewRow);
-        submitAllBtn.addEventListener('click', handleSubmit);
+        savePdfBtn.addEventListener('click', handleSavePdf);
         clearSignatureBtn.addEventListener('click', clearCanvas);
         messageOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
 
