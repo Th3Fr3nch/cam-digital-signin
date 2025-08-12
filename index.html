@@ -42,14 +42,30 @@
             -moz-appearance: none;
             appearance: none;
         }
-        .table-fixed {
-            table-layout: fixed;
+        .signature-image {
+            height: 40px;
+            width: 120px;
+            object-fit: contain;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
         }
+        /* Styles for the new sub-row */
+        .sub-row td {
+            padding-top: 0.5rem;
+            padding-bottom: 1rem;
+            padding-left: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .main-row td {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <div id="form-container" class="container mx-auto max-w-screen-2xl p-4 sm:p-6 lg:p-8">
+    <div id="form-container" class="container mx-auto max-w-screen-xl p-4 sm:p-6 lg:p-8">
         <!-- Header Section -->
         <div class="bg-white p-6 rounded-xl shadow-md mb-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
@@ -90,20 +106,13 @@
         <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold text-gray-700 mb-4">Crew Sign-In</h2>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-600 table-fixed">
+                <table class="w-full text-sm text-left text-gray-600">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-4 py-3 w-40">Area Worked</th>
-                            <th scope="col" class="px-4 py-3 w-52">Name (First/Last)</th>
-                            <th scope="col" class="px-4 py-3 w-32">Suncor ID</th>
-                            <th scope="col" class="px-4 py-3 w-64">Classification</th>
-                            <th scope="col" class="px-4 py-3 w-28 text-center">Signature</th>
-                            <th scope="col" class="px-4 py-3 w-16 text-center">Late</th>
-                            <th scope="col" class="px-4 py-3 w-16 text-center">Absent</th>
-                            <th scope="col" class="px-4 py-3 w-20 text-center">Training</th>
-                            <th scope="col" class="px-4 py-3 w-16 text-center">Camp</th>
-                            <th scope="col" class="px-4 py-3 w-16 text-center">Town</th>
-                            <th scope="col" class="px-4 py-3 w-16 text-center"></th>
+                            <th scope="col" class="px-4 py-3">Area Worked</th>
+                            <th scope="col" class="px-4 py-3">Name (First/Last)</th>
+                            <th scope="col" class="px-4 py-3">Suncor ID</th>
+                            <th scope="col" class="px-4 py-3">Classification</th>
                         </tr>
                     </thead>
                     <tbody id="crew-table-body">
@@ -335,25 +344,37 @@
         // --- DATA & TABLE LOGIC ---
         function addCrewRow() {
             const rowId = `row-${Date.now()}`;
-            const row = document.createElement('tr');
-            row.id = rowId;
-            row.className = 'bg-white border-b hover:bg-gray-50 align-middle';
+            const mainRow = document.createElement('tr');
+            const subRow = document.createElement('tr');
+
+            mainRow.id = rowId;
+            mainRow.className = 'bg-white hover:bg-gray-50 align-middle main-row';
+            subRow.className = 'bg-white hover:bg-gray-50 align-middle sub-row';
             
-            row.innerHTML = `
+            mainRow.innerHTML = `
                 <td class="px-4 py-2"><input type="text" placeholder="e.g., Unit 5" class="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2"></td>
                 <td class="px-4 py-2 name-cell-container"></td>
                 <td class="px-4 py-2"><input type="text" data-field="suncorId" placeholder="Suncor ID" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly></td>
                 <td class="px-4 py-2"><input type="text" data-field="classification" placeholder="Classification" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly></td>
-                <td class="px-4 py-2 text-center"><button class="sign-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded">Sign</button></td>
-                <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isLate" class="form-checkbox"></td>
-                <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isAbsent" class="form-checkbox"></td>
-                <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isTraining" class="form-checkbox"></td>
-                <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isCamp" class="form-checkbox"></td>
-                <td class="px-4 py-2 text-center"><input type="checkbox" data-field="isTown" class="form-checkbox"></td>
-                <td class="px-4 py-2 text-center"><button class="delete-row-btn text-red-500 hover:text-red-700 font-bold">X</button></td>
             `;
             
-            const nameCellContainer = row.querySelector('.name-cell-container');
+            subRow.innerHTML = `
+                <td colspan="4">
+                    <div class="flex items-center space-x-4 pl-2">
+                        <div class="signature-cell text-center">
+                            <button class="sign-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded">Sign</button>
+                        </div>
+                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Late:</label><input type="checkbox" data-field="isLate" class="form-checkbox"></div>
+                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Absent:</label><input type="checkbox" data-field="isAbsent" class="form-checkbox"></div>
+                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Training:</label><input type="checkbox" data-field="isTraining" class="form-checkbox"></div>
+                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Camp:</label><input type="checkbox" data-field="isCamp" class="form-checkbox"></div>
+                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Town:</label><input type="checkbox" data-field="isTown" class="form-checkbox"></div>
+                        <button class="delete-row-btn text-red-500 hover:text-red-700 font-bold ml-auto pr-4">X</button>
+                    </div>
+                </td>
+            `;
+
+            const nameCellContainer = mainRow.querySelector('.name-cell-container');
             const nameSelect = document.createElement('select');
             nameSelect.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2 form-select';
             
@@ -375,20 +396,24 @@
             nameSelect.appendChild(addNewOption);
             
             nameCellContainer.appendChild(nameSelect);
-            crewTableBody.appendChild(row);
             
-            row.querySelector('.sign-btn').addEventListener('click', () => openSignatureModal(row));
-            row.querySelector('.delete-row-btn').addEventListener('click', () => row.remove());
-            nameSelect.addEventListener('change', handleNameSelection);
+            crewTableBody.appendChild(mainRow);
+            crewTableBody.appendChild(subRow);
+            
+            subRow.querySelector('.sign-btn').addEventListener('click', () => openSignatureModal(subRow));
+            subRow.querySelector('.delete-row-btn').addEventListener('click', () => {
+                mainRow.remove();
+                subRow.remove();
+            });
+            nameSelect.addEventListener('change', (e) => handleNameSelection(e, mainRow, subRow));
         }
 
-        function handleNameSelection(e) {
+        function handleNameSelection(e, mainRow, subRow) {
             const selectedValue = e.target.value;
-            const parentRow = e.target.closest('tr');
-            const suncorIdInput = parentRow.querySelector('input[data-field="suncorId"]');
-            const classInput = parentRow.querySelector('input[data-field="classification"]');
-            const campCheckbox = parentRow.querySelector('input[data-field="isCamp"]');
-            const townCheckbox = parentRow.querySelector('input[data-field="isTown"]');
+            const suncorIdInput = mainRow.querySelector('input[data-field="suncorId"]');
+            const classInput = mainRow.querySelector('input[data-field="classification"]');
+            const campCheckbox = subRow.querySelector('input[data-field="isCamp"]');
+            const townCheckbox = subRow.querySelector('input[data-field="isTown"]');
 
             if (selectedValue === '_addNew_') {
                 const textInput = document.createElement('input');
@@ -454,11 +479,11 @@
             const filename = `${projectInput.value.replace(/[^a-z0-9]/gi, '_')}_${dateInput.value}.pdf`;
             
             const opt = {
-                margin:       0.5,
+                margin:       0.25,
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).save();
@@ -474,13 +499,15 @@
         saveSignatureBtn.addEventListener('click', () => {
             if (!currentRowForSignature) return;
             const signatureDataUrl = signaturePad.toDataURL('image/png');
-            currentRowForSignature.dataset.signature = signatureDataUrl;
             
-            const signButton = currentRowForSignature.querySelector('.sign-btn');
-            signButton.textContent = 'Signed';
-            signButton.classList.remove('bg-red-500', 'hover:bg-red-600');
-            signButton.classList.add('bg-green-500', 'cursor-not-allowed');
-            signButton.disabled = true;
+            const signatureCell = currentRowForSignature.querySelector('.signature-cell');
+            
+            const sigImage = document.createElement('img');
+            sigImage.src = signatureDataUrl;
+            sigImage.classList.add('signature-image');
+            
+            signatureCell.innerHTML = '';
+            signatureCell.appendChild(sigImage);
 
             closeSignatureModal();
         });
