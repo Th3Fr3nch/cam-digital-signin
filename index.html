@@ -6,6 +6,8 @@
     <title>CAM Industrial - Digital Attendance Sheet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -58,13 +60,6 @@
             padding-bottom: 0;
             border-bottom: none;
         }
-        /* Hide buttons when printing */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-        }
-
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -124,7 +119,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="flex justify-start mt-4 no-print">
+            <div class="flex justify-start mt-4">
                 <button id="add-row-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
                     + Add Crew Member
                 </button>
@@ -132,15 +127,15 @@
         </div>
 
         <!-- Submission Section -->
-        <div class="mt-6 flex justify-end space-x-4 no-print">
-             <button id="print-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
-                Print / Save as PDF
+        <div class="mt-6 flex justify-end space-x-4">
+             <button id="generate-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
+                Generate PDF
             </button>
         </div>
     </div>
 
     <!-- Signature Modal -->
-    <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
+    <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto">
             <h3 class="text-xl font-bold mb-4">Provide Signature</h3>
             <canvas id="signature-pad" width="400" height="200"></canvas>
@@ -152,7 +147,7 @@
     </div>
     
     <!-- Message Modal -->
-    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
+    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-11/12 max-w-md mx-auto text-center">
             <h3 id="message-title" class="text-2xl font-bold mb-4"></h3>
             <p id="message-text" class="text-gray-700 mb-6"></p>
@@ -274,7 +269,7 @@
         const dateInput = document.getElementById('date');
         const addRowBtn = document.getElementById('add-row-btn');
         const crewTableBody = document.getElementById('crew-table-body');
-        const printBtn = document.getElementById('print-btn');
+        const generatePdfBtn = document.getElementById('generate-pdf-btn');
         const signatureModal = document.getElementById('signature-modal');
         const signaturePad = document.getElementById('signature-pad');
         const clearSignatureBtn = document.getElementById('clear-signature-btn');
@@ -373,7 +368,7 @@
                         <div class="flex items-center space-x-2"><label class="text-xs font-medium">Training:</label><input type="checkbox" data-field="isTraining" class="form-checkbox"></div>
                         <div class="flex items-center space-x-2"><label class="text-xs font-medium">Camp:</label><input type="checkbox" data-field="isCamp" class="form-checkbox"></div>
                         <div class="flex items-center space-x-2"><label class="text-xs font-medium">Town:</label><input type="checkbox" data-field="isTown" class="form-checkbox"></div>
-                        <button class="delete-row-btn text-red-500 hover:text-red-700 font-bold ml-auto pr-4 no-print">X</button>
+                        <button class="delete-row-btn text-red-500 hover:text-red-700 font-bold ml-auto pr-4">X</button>
                     </div>
                 </td>
             `;
@@ -470,17 +465,30 @@
             }
         }
         
+        function generatePdf() {
+            const projectInput = document.getElementById('project');
+            if (!projectInput.value.trim()) {
+                showMessage('Cannot Generate PDF', 'Please enter a Project / Job # before generating the PDF.');
+                return;
+            }
+
+            const element = document.getElementById('form-container');
+            const opt = {
+                margin: 0.25,
+                filename: `${projectInput.value.replace(/[^a-z0-9]/gi, '_')}_${dateInput.value}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // This opens the PDF in a new tab, which is more reliable on mobile.
+            html2pdf().set(opt).from(element).output('dataurlnewwindow');
+        }
+
         // --- EVENT LISTENERS & INITIALIZATION ---
         dateInput.valueAsDate = new Date();
         addRowBtn.addEventListener('click', addCrewRow);
-        printBtn.addEventListener('click', () => {
-            const projectInput = document.getElementById('project');
-            if (!projectInput.value.trim()) {
-                showMessage('Cannot Print', 'Please enter a Project / Job # before printing.');
-                return;
-            }
-            window.print()
-        });
+        generatePdfBtn.addEventListener('click', generatePdf);
         clearSignatureBtn.addEventListener('click', clearCanvas);
         messageOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
 
