@@ -60,6 +60,12 @@
             padding-bottom: 0;
             border-bottom: none;
         }
+        /* Hide buttons when printing */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
 
     </style>
 </head>
@@ -120,7 +126,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="flex justify-start mt-4">
+            <div class="flex justify-start mt-4 no-print">
                 <button id="add-row-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
                     + Add Crew Member
                 </button>
@@ -128,15 +134,18 @@
         </div>
 
         <!-- Submission Section -->
-        <div class="mt-6 flex justify-end space-x-4">
+        <div class="mt-6 flex justify-end space-x-4 no-print">
+             <button id="print-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
+                Print / Save for iPad
+            </button>
              <button id="save-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
-                Save as PDF
+                Save as PDF (Desktop)
             </button>
         </div>
     </div>
 
     <!-- Signature Modal -->
-    <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto">
             <h3 class="text-xl font-bold mb-4">Provide Signature</h3>
             <canvas id="signature-pad" width="400" height="200"></canvas>
@@ -148,7 +157,7 @@
     </div>
     
     <!-- Message Modal -->
-    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-11/12 max-w-md mx-auto text-center">
             <h3 id="message-title" class="text-2xl font-bold mb-4"></h3>
             <p id="message-text" class="text-gray-700 mb-6"></p>
@@ -271,6 +280,7 @@
         const addRowBtn = document.getElementById('add-row-btn');
         const crewTableBody = document.getElementById('crew-table-body');
         const savePdfBtn = document.getElementById('save-pdf-btn');
+        const printBtn = document.getElementById('print-btn');
         const signatureModal = document.getElementById('signature-modal');
         const signaturePad = document.getElementById('signature-pad');
         const clearSignatureBtn = document.getElementById('clear-signature-btn');
@@ -369,7 +379,7 @@
                         <div class="flex items-center space-x-2"><label class="text-xs font-medium">Training:</label><input type="checkbox" data-field="isTraining" class="form-checkbox"></div>
                         <div class="flex items-center space-x-2"><label class="text-xs font-medium">Camp:</label><input type="checkbox" data-field="isCamp" class="form-checkbox"></div>
                         <div class="flex items-center space-x-2"><label class="text-xs font-medium">Town:</label><input type="checkbox" data-field="isTown" class="form-checkbox"></div>
-                        <button class="delete-row-btn text-red-500 hover:text-red-700 font-bold ml-auto pr-4">X</button>
+                        <button class="delete-row-btn text-red-500 hover:text-red-700 font-bold ml-auto pr-4 no-print">X</button>
                     </div>
                 </td>
             `;
@@ -493,6 +503,7 @@
         dateInput.valueAsDate = new Date();
         addRowBtn.addEventListener('click', addCrewRow);
         savePdfBtn.addEventListener('click', handleSavePdf);
+        printBtn.addEventListener('click', () => window.print());
         clearSignatureBtn.addEventListener('click', clearCanvas);
         messageOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
 
