@@ -60,6 +60,16 @@
             padding-bottom: 0;
             border-bottom: none;
         }
+        /* Hide elements when printing */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            @page {
+                size: letter portrait;
+                margin: 0.5in;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -68,7 +78,7 @@
         <!-- Header Section -->
         <div class="bg-white p-6 rounded-xl shadow-md mb-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-                <img src="https://i.imgur.com/O1hP4yT.png" alt="CAM Industrial Solutions Logo" class="h-12 mb-4 sm:mb-0" onerror="this.onerror=null;this.src='https://placehold.co/200x50/003366/FFFFFF?text=CAM+Logo';">
+                <img src="https://i.imgur.com/O1hP4yT.png" alt="CAM Industrial Solutions Logo" class="h-12 mb-4 sm:mb-0" crossorigin="anonymous" onerror="this.onerror=null;this.src='https://placehold.co/200x50/003366/FFFFFF?text=CAM+Logo';">
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Digital Attendance Sheet</h1>
             </div>
 
@@ -119,7 +129,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="flex justify-start mt-4">
+            <div class="flex justify-start mt-4 no-print">
                 <button id="add-row-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
                     + Add Crew Member
                 </button>
@@ -127,7 +137,7 @@
         </div>
 
         <!-- Submission Section -->
-        <div class="mt-6 flex justify-end space-x-4">
+        <div class="mt-6 flex justify-end space-x-4 no-print">
              <button id="generate-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
                 Generate PDF
             </button>
@@ -135,7 +145,7 @@
     </div>
 
     <!-- Signature Modal -->
-    <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto">
             <h3 class="text-xl font-bold mb-4">Provide Signature</h3>
             <canvas id="signature-pad" width="400" height="200"></canvas>
@@ -147,7 +157,7 @@
     </div>
     
     <!-- Message Modal -->
-    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-11/12 max-w-md mx-auto text-center">
             <h3 id="message-title" class="text-2xl font-bold mb-4"></h3>
             <p id="message-text" class="text-gray-700 mb-6"></p>
@@ -465,30 +475,42 @@
             }
         }
         
-        function generatePdf() {
+        function handlePdfGeneration() {
             const projectInput = document.getElementById('project');
+            const dateInput = document.getElementById('date');
+
             if (!projectInput.value.trim()) {
                 showMessage('Cannot Generate PDF', 'Please enter a Project / Job # before generating the PDF.');
                 return;
             }
 
-            const element = document.getElementById('form-container');
-            const opt = {
-                margin: 0.25,
-                filename: `${projectInput.value.replace(/[^a-z0-9]/gi, '_')}_${dateInput.value}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
+            // --- Device Detection ---
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-            // This opens the PDF in a new tab, which is more reliable on mobile.
-            html2pdf().set(opt).from(element).output('dataurlnewwindow');
+            if (isIOS) {
+                // Use the reliable window.print() method for iOS devices
+                window.print();
+            } else {
+                // Use html2pdf for all other devices (Desktop, Android, etc.)
+                const element = document.getElementById('form-container');
+                const filename = `${projectInput.value.replace(/[^a-z0-9]/gi, '_')}_${dateInput.value}.pdf`;
+                
+                const opt = {
+                    margin:       0.25,
+                    filename:     filename,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save();
+            }
         }
 
         // --- EVENT LISTENERS & INITIALIZATION ---
         dateInput.valueAsDate = new Date();
         addRowBtn.addEventListener('click', addCrewRow);
-        generatePdfBtn.addEventListener('click', generatePdf);
+        generatePdfBtn.addEventListener('click', handlePdfGeneration);
         clearSignatureBtn.addEventListener('click', clearCanvas);
         messageOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
 
@@ -512,9 +534,9 @@
         signaturePad.addEventListener('mousemove', draw);
         signaturePad.addEventListener('mouseup', stopDrawing);
         signaturePad.addEventListener('mouseleave', stopDrawing);
-        signaturePad.addEventListener('touchstart', startDrawing);
-        signaturePad.addEventListener('touchmove', draw);
-        signaturePad.addEventListener('touchend', stopDrawing);
+        signaturePad.addEventListener('touchstart', startDrawing, { passive: false });
+        signaturePad.addEventListener('touchmove', draw, { passive: false });
+        signaturePad.addEventListener('touchend', stopDrawing, { passive: false });
 
         addCrewRow();
     </script>
