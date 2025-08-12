@@ -6,8 +6,6 @@
     <title>CAM Industrial - Digital Attendance Sheet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- PDF Generation Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -135,11 +133,8 @@
 
         <!-- Submission Section -->
         <div class="mt-6 flex justify-end space-x-4 no-print">
-             <button id="print-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
-                Print / Save for iPad
-            </button>
-             <button id="save-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
-                Save as PDF (Desktop)
+             <button id="print-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
+                Print / Save as PDF
             </button>
         </div>
     </div>
@@ -279,7 +274,6 @@
         const dateInput = document.getElementById('date');
         const addRowBtn = document.getElementById('add-row-btn');
         const crewTableBody = document.getElementById('crew-table-body');
-        const savePdfBtn = document.getElementById('save-pdf-btn');
         const printBtn = document.getElementById('print-btn');
         const signatureModal = document.getElementById('signature-modal');
         const signaturePad = document.getElementById('signature-pad');
@@ -476,34 +470,17 @@
             }
         }
         
-        function handleSavePdf() {
-            const projectInput = document.getElementById('project');
-            const dateInput = document.getElementById('date');
-            
-            if (!projectInput.value.trim()) {
-                showMessage('Cannot Save PDF', 'Please enter a Project / Job # before saving.');
-                return;
-            }
-
-            const element = document.getElementById('form-container');
-            const filename = `${projectInput.value.replace(/[^a-z0-9]/gi, '_')}_${dateInput.value}.pdf`;
-            
-            const opt = {
-                margin:       0.25,
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save();
-        }
-
         // --- EVENT LISTENERS & INITIALIZATION ---
         dateInput.valueAsDate = new Date();
         addRowBtn.addEventListener('click', addCrewRow);
-        savePdfBtn.addEventListener('click', handleSavePdf);
-        printBtn.addEventListener('click', () => window.print());
+        printBtn.addEventListener('click', () => {
+            const projectInput = document.getElementById('project');
+            if (!projectInput.value.trim()) {
+                showMessage('Cannot Print', 'Please enter a Project / Job # before printing.');
+                return;
+            }
+            window.print()
+        });
         clearSignatureBtn.addEventListener('click', clearCanvas);
         messageOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
 
