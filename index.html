@@ -32,10 +32,12 @@
   <div id="form-container" class="container mx-auto max-w-screen-xl p-4 sm:p-6 lg:p-8">
     <!-- Header -->
     <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-        <img src="https://i.ibb.co/yV28wVz/Cam-Logo-Side-ways.png" alt="CAM Industrial Solutions Logo"
-             class="h-12 mb-4 sm:mb-0" crossorigin="anonymous"
-             onerror="this.onerror=null;this.src='https://placehold.co/200x50/003366/FFFFFF?text=CAM+Logo';">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+        <!-- EXACT CAM LOGO (base64-inlined PNG) -->
+        <img
+          class="h-12 sm:h-14 object-contain"
+          alt="CAM Industrial Solutions Logo"
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAm8AAAC3CAYAAABExLnjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8...SNIPPED_FOR_LENGTH..."/>
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Digital Attendance Sheet</h1>
       </div>
 
@@ -127,7 +129,10 @@
   </div>
 
   <script type="module">
-    // --- The entire roster as pasted (tab-separated: Name\tSUNID\tClassification\tCamp|Town)
+    // --- Exclude specific names here if ever needed (leave empty to keep all)
+    const SKIP_NAMES = new Set([]);
+
+    // --- Entire roster (tab-separated: Name \t SUNID \t Classification \t Camp|Town)
     const ROSTER_TSV = `
 Campbell, Adam	90152831	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
 Jeong, Yeongcheol	90412650	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
@@ -386,7 +391,7 @@ McLellan, Michael	90132498	Quality Control Inspector II	Town
 Armstrong, Russell	347151	Quality Control Inspector II	Town
 `.trim();
 
-    // --- Parse roster (dedupe by SUNID)
+    // --- Parse TSV -> objects (dedupe by SUNID)
     function parseRoster(tsv) {
       const lines = tsv.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       const out = [];
@@ -394,6 +399,7 @@ Armstrong, Russell	347151	Quality Control Inspector II	Town
         const parts = line.split(/\t+/);
         if (parts.length < 4) continue;
         const [name, suncorId, classification, location] = parts.map(s => s.trim());
+        if (SKIP_NAMES.has(name)) continue;
         out.push({ name, suncorId, classification, location });
       }
       const byId = new Map();
@@ -463,8 +469,10 @@ Armstrong, Russell	347151	Quality Control Inspector II	Town
     }
 
     function addCrewRow() {
+      const rowId = `row-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
       const mainRow = document.createElement('tr');
       const subRow  = document.createElement('tr');
+      mainRow.id = rowId;
       mainRow.className = 'bg-white hover:bg-gray-50 align-middle main-row';
       subRow.className  = 'bg-white hover:bg-gray-50 align-middle sub-row';
 
@@ -559,7 +567,7 @@ Armstrong, Russell	347151	Quality Control Inspector II	Town
       }
     }
 
-    // PDF generation (single bottom button)
+    // PDF generation
     function handlePdfGeneration() {
       const projectInput = document.getElementById('project');
       if (!projectInput.value.trim()) {
@@ -567,8 +575,7 @@ Armstrong, Russell	347151	Quality Control Inspector II	Town
         return;
       }
       const element = document.getElementById('form-container');
-      const dateVal = document.getElementById('date').value || 'today';
-      const file = `${projectInput.value.replace(/[^a-z0-9]/gi,'_')}_${dateVal}.pdf`;
+      const file = `${projectInput.value.replace(/[^a-z0-9]/gi,'_')}_${dateInput.value}.pdf`;
       const opt = {
         margin: .25, filename: file,
         image: { type:'jpeg', quality:.98 },
@@ -579,7 +586,7 @@ Armstrong, Russell	347151	Quality Control Inspector II	Town
     }
 
     // Events
-    document.getElementById('date').valueAsDate = new Date();
+    dateInput.valueAsDate = new Date();
     document.getElementById('add-row-btn').addEventListener('click', addCrewRow);
     document.getElementById('generate-pdf-btn').addEventListener('click', handlePdfGeneration);
 
