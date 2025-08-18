@@ -1,483 +1,618 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAM Industrial - Digital Attendance Sheet</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- PDF Generation Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        #signature-pad { border: 2px dashed #cbd5e1; border-radius: 0.5rem; cursor: crosshair; }
-        ::placeholder { color: #94a3b8; }
-        input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
-        input[type="checkbox"]:disabled { background-color: #e5e7eb; border-color: #d1d5db; cursor: not-allowed; }
-        button { transition: all 0.2s ease-in-out; }
-        .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em;
-            padding-right: 2.5rem; -webkit-appearance: none; -moz-appearance: none; appearance: none;
-        }
-        .signature-image { height: 40px; width: 120px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 0.25rem; }
-        .sub-row td { padding-top: 0.5rem; padding-bottom: 1rem; padding-left: 1rem; border-bottom: 1px solid #e5e7eb; }
-        .main-row td { padding-bottom: 0; border-bottom: none; }
-
-        /* Hide elements when printing */
-        @media print {
-            .no-print { display: none !important; }
-            @page { size: letter portrait; margin: 0.5in; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CAM Industrial - Digital Attendance Sheet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    #signature-pad { border: 2px dashed #cbd5e1; border-radius: .5rem; cursor: crosshair; }
+    ::placeholder { color: #94a3b8; }
+    input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
+    input[type="checkbox"]:disabled { background-color:#e5e7eb; border-color:#d1d5db; cursor:not-allowed; }
+    button { transition: all .2s ease-in-out; }
+    .form-select {
+      background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position:right .5rem center;background-repeat:no-repeat;background-size:1.5em 1.5em;padding-right:2.5rem;appearance:none;
+    }
+    .signature-image { height:40px;width:120px;object-fit:contain;border:1px solid #e5e7eb;border-radius:.25rem; }
+    .sub-row td { padding-top:.5rem;padding-bottom:1rem;padding-left:1rem;border-bottom:1px solid #e5e7eb; }
+    .main-row td { padding-bottom:0;border-bottom:none; }
+    @media print {
+      .no-print { display:none !important; }
+      @page { size: letter portrait; margin: .5in; }
+    }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <div id="form-container" class="container mx-auto max-w-screen-xl p-4 sm:p-6 lg:p-8">
-        <!-- Header Section -->
-        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-                <img src="https://i.ibb.co/yV28wVz/Cam-Logo-Side-ways.png" alt="CAM Industrial Solutions Logo" class="h-12 mb-4 sm:mb-0" crossorigin="anonymous" onerror="this.onerror=null;this.src='https://placehold.co/200x50/003366/FFFFFF?text=CAM+Logo';">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Digital Attendance Sheet</h1>
-            </div>
+  <div id="form-container" class="container mx-auto max-w-screen-xl p-4 sm:p-6 lg:p-8">
+    <!-- Header -->
+    <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <img src="https://i.ibb.co/yV28wVz/Cam-Logo-Side-ways.png" alt="CAM Industrial Solutions Logo"
+             class="h-12 mb-4 sm:mb-0" crossorigin="anonymous"
+             onerror="this.onerror=null;this.src='https://placehold.co/200x50/003366/FFFFFF?text=CAM+Logo';">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Digital Attendance Sheet</h1>
+      </div>
 
-            <!-- Header Information Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
-                <div class="flex flex-col">
-                    <label for="project" class="text-sm font-medium text-gray-600 mb-1">Project / Job #</label>
-                    <input type="text" id="project" placeholder="e.g., Coker Unit Turnaround" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </div>
-                <div class="flex flex-col">
-                    <label for="date" class="text-sm font-medium text-gray-600 mb-1">Date</label>
-                    <input type="date" id="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </div>
-                <div class="flex flex-col">
-                    <label for="outage" class="text-sm font-medium text-gray-600 mb-1">Outage</label>
-                    <input type="text" id="outage" placeholder="e.g., Spring 2025" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </div>
-                <div class="flex flex-col">
-                    <label for="manager" class="text-sm font-medium text-gray-600 mb-1">Manager</label>
-                    <input type="text" id="manager" placeholder="Manager's Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </div>
-                <div class="flex flex-col">
-                    <label for="supervisor" class="text-sm font-medium text-gray-600 mb-1">Supervisor</label>
-                    <input type="text" id="supervisor" placeholder="Supervisor's Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </div>
-                <div class="flex flex-col">
-                    <label for="foreperson" class="text-sm font-medium text-gray-600 mb-1">Foreperson</label>
-                    <input type="text" id="foreperson" placeholder="Foreperson's Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </div>
-            </div>
+      <!-- Header info -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
+        <div class="flex flex-col">
+          <label for="project" class="text-sm font-medium text-gray-600 mb-1">Project / Job #</label>
+          <input type="text" id="project" placeholder="e.g., Coker Unit Turnaround"
+                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
         </div>
-
-        <!-- Crew Members Table -->
-        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
-            <h2 class="text-xl font-bold text-gray-700 mb-4">Crew Sign-In</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-600">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-4 py-3">Area Worked</th>
-                            <th scope="col" class="px-4 py-3">Name (First/Last)</th>
-                            <th scope="col" class="px-4 py-3">Suncor ID</th>
-                            <th scope="col" class="px-4 py-3">Classification</th>
-                        </tr>
-                    </thead>
-                    <tbody id="crew-table-body">
-                        <!-- Rows will be added here by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="flex justify-start mt-4 no-print">
-                <button id="add-row-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
-                    + Add Crew Member
-                </button>
-            </div>
+        <div class="flex flex-col">
+          <label for="date" class="text-sm font-medium text-gray-600 mb-1">Date</label>
+          <input type="date" id="date"
+                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
         </div>
+        <div class="flex flex-col">
+          <label for="outage" class="text-sm font-medium text-gray-600 mb-1">Outage</label>
+          <input type="text" id="outage" placeholder="e.g., Spring 2025"
+                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+        <div class="flex flex-col">
+          <label for="manager" class="text-sm font-medium text-gray-600 mb-1">Manager</label>
+          <input type="text" id="manager" placeholder="Manager's Name"
+                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+        <div class="flex flex-col">
+          <label for="supervisor" class="text-sm font-medium text-gray-600 mb-1">Supervisor</label>
+          <input type="text" id="supervisor" placeholder="Supervisor's Name"
+                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+        <div class="flex flex-col">
+          <label for="foreperson" class="text-sm font-medium text-gray-600 mb-1">Foreperson</label>
+          <input type="text" id="foreperson" placeholder="Foreperson's Name"
+                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+      </div>
+    </div>
 
-        <!-- Submission Section -->
-        <div class="mt-6 flex justify-end space-x-4 no-print">
-            <button id="generate-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
-                Generate PDF
+    <!-- Crew table -->
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+      <h2 class="text-xl font-bold text-gray-700 mb-4">Crew Sign-In</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-600">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th class="px-4 py-3">Area Worked</th>
+              <th class="px-4 py-3">Name (First/Last)</th>
+              <th class="px-4 py-3">Suncor ID</th>
+              <th class="px-4 py-3">Classification</th>
+            </tr>
+          </thead>
+          <tbody id="crew-table-body"></tbody>
+        </table>
+      </div>
+      <div class="flex justify-start mt-4 no-print">
+        <button id="add-row-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
+          + Add Crew Member
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-6 flex justify-end space-x-4 no-print">
+      <button id="generate-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
+        Generate PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Signature Modal -->
+  <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
+    <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto">
+      <h3 class="text-xl font-bold mb-4">Provide Signature</h3>
+      <canvas id="signature-pad" width="400" height="200"></canvas>
+      <div class="flex justify-between mt-4">
+        <button id="clear-signature-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Clear</button>
+        <button id="save-signature-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Save Signature</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Modal -->
+  <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
+    <div class="bg-white rounded-xl shadow-2xl p-8 w-11/12 max-w-md mx-auto text-center">
+      <h3 id="message-title" class="text-2xl font-bold mb-4"></h3>
+      <p id="message-text" class="text-gray-700 mb-6"></p>
+      <button id="message-ok-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">OK</button>
+    </div>
+  </div>
+
+  <script type="module">
+    // --- Put the exact names to exclude (if any) here, e.g.:
+    // const SKIP_NAMES = new Set(['Lastname, Firstname', 'Another, Person']);
+    const SKIP_NAMES = new Set([]);
+
+    // --- The entire roster as pasted (tab-separated: Name\tSUNID\tClassification\tCamp|Town)
+    const ROSTER_TSV = `
+Campbell, Adam	90152831	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Jeong, Yeongcheol	90412650	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
+Power, Kevin	66014	Senior Superintendent, Site Maintenance	Town
+Macdonald, Allan	90157664	Labourer Journeyman | 12-JM-S-A	Town
+Rabbit, Lawrence	90151443	Boilermaker Journeyman Welder | 2-JMW-B-A	Camp
+Walsh, Saranne	90124091	Millwright Apprentice 4 | 13-A4-S-A	Town
+Ozolins, Rollie	90159315	Pipefitter General Foreman Cert. | 16-GF-S-B	Town
+Hutsulak, Richard	90428404	Boilermaker Journeyman Welder | 2-JMW-B-A	Camp
+Antle, Chris	90151350	Superintendent, Site Maintenance	Town
+Martin, Trina	66449	Senior Project Control Specialist	Town
+Keating, William	90159400	Pipefitter Journeyman | 16-JM-S-H	Town
+Ok, Minwook	614847	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-A	Camp
+Baker, Jason	90209214	Manager I, Quality Control	Town
+Peckham, Brian	90156418	Pipefitter General Foreman Cert. | 16-GF-S-A	Camp
+Shapka, Dale	90152601	Pipefitter Journeyman | 16-JM-S-A	Camp
+Fudge, Jason	692498	Millwright Journeyman | 13-JM-S-H	Town
+Ricci, Anthony	90206514	Manager II, Site Maintenance	Town
+Power, David	90168605	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Beaulieu, Roch	818170	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-A	Camp
+Smith, John	66166	Project HSE Advisor I	Town
+Campbell, Edward	66236	Iron Worker (ST) Journeyman | 10-JM-S-A	Town
+Burke, Winston	90124336	Pipefitter Journeyman | 16-JM-S-A	Camp
+Macarthur, Andrew	90152347	Superintendent, Site Maintenance	Town
+Davis, Darryl	66098	Pipefitter Foreman Cert. | 16-FM-S-B	Camp
+Neis, Mackenzie	90153790	Pipefitter General Foreman Cert. | 16-GF-S-A	Camp
+Fedun, Darrell	90156085	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
+Macphee, Debbie	90155211	Labourer Foreman Cert. | 12-FM-S-A	Town
+Mccarthy, Gregory	90153795	Pipefitter General Foreman Cert. | 16-GF-S-A	Camp
+Sharpe, Bernard	90151441	Pipefitter Journeyman | 16-JM-S-B	Camp
+Hunter, Conrad	90151693	Pipefitter Foreman Cert. | 16-FM-S-A	Camp
+Pyke, William	90156043	Labourer Journeyman | 12-JM-S-B	Town
+Berube, Nicolas	90413795	Pipefitter General Foreman Cert. | 16-GF-S-B	Town
+Capstick, Mitchel	90156358	Pipefitter Apprentice 2 | 16-A2-S-B	Town
+Malaluan, Roman	90156475	Pipefitter Journeyman Welder | 16-JMW-S-H	Town
+Smith, William	66577	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-A	Camp
+Wu, Liquan	90149002	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Camp
+Schafers, Jerrod	90157831	Boilermaker Foreman Welder | 2-FMW-S-H	Town
+Kalaciro, Peter	694662	Millwright Journeyman | 13-JM-S-B	Camp
+Swityk, Dean	465127	Boilermaker Foreman Welder | 2-FMW-B-A	Town
+Clarahan, Joseph	632276	Millwright Journeyman | 13-JM-S-B	Camp
+Budden, April	90151069	Labourer Foreman Non Cert. | 12-NFM-S-A	Town
+Pilote, Alexandre	432675	Iron Worker (ST) Foreman Welder | 10-FMW-S-B	Camp
+Migueles, Guillermo	90153662	Millwright Journeyman | 13-JM-S-A	Camp
+Andrea, Joseph	607829	Millwright Journeyman | 13-JM-S-H	Town
+Lopez, Raymond	90157792	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-A	Camp
+Pazdziorko, David	90153616	Supervisor, Site Maintenance	Town
+Byrne, Geoffrey	593864	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Munro, Markus	90201851	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
+Maclellan, Daniel	90150302	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Gulbraa, Barry	90152470	Millwright Journeyman (R) | 13-JMR-S-A	Camp
+Brown, Craig	90102224	Pipefitter Journeyman | 16-JM-S-B	Camp
+Payne, Sandra A	78095	Document Controller I	Town
+Ali, Guled	477643	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Marinelli, Andrea	90152955	Millwright Apprentice 6 | 13-A6-S-A	Town
+Cole, Malcolm	90167824	Pipefitter Foreman Welder | 16-FMW-S-A	Camp
+Macsween, Curtis	90163113	Iron Worker (ST) Journeyman | 10-JM-S-B	Town
+Macmullin, Andrew	90154057	Labourer Journeyman | 12-JM-S-A	Town
+Cichowski, Tadeusz (Ted)	90168593	Pipefitter Journeyman | 16-JM-S-A	Camp
+Diaz, Wilfredo Morejon	569632	Pipefitter General Foreman Cert. | 16-GF-S-A	Camp
+Jacob, Stephen	90153254	Pipefitter Foreman Welder | 16-FMW-S-A	Camp
+Anderson, Samuel	394803	Boilermaker Journeyman | 2-JM-B-A	Camp
+Marofke, Nicole	90434915	Pipefitter Journeyman | 16-JM-S-A	Camp
+Gutierrez, Jorge	90414519	Pipefitter Apprentice 3 | 16-A3-S-A	Camp
+Schritt, Karla	90159298	Millwright Journeyman | 13-JM-S-H	Town
+Abdulahi, Mohamed	90154695	Labourer Journeyman | 12-JM-S-A	Town
+Schaeffer, Brhiannon	90157960	Labourer Journeyman | 12-JM-S-B	Town
+Beaulieu, Jason	90413791	Iron Worker (ST) Foreman Cert. | 10-FM-S-B	Camp
+Walsh, Felicia	90151420	Labourer Journeyman | 12-JM-S-A	Town
+St Onge, Colin	90155153	Iron Worker (ST) Foreman Cert. | 10-FM-S-A	Town
+Wade, Tony	90147461	Millwright Journeyman | 13-JM-S-A	Camp
+Brown, Joseph	90154912	Pipefitter Journeyman | 16-JM-S-B	Camp
+Luff, Derrick	90150665	Labourer Foreman Non Cert. | 12-NFM-S-A	Town
+Macdonald, Jonathan	90115754	Millwright Foreman Cert. | 13-FM-S-A	Camp
+Boisvert, Daniel	90152514	Pipefitter Journeyman | 16-JM-S-A	Camp
+Pardy, Derek	90152296	Labourer Journeyman | 12-JM-S-A	Town
+Boutilier, John	90150426	Labourer Foreman Non Cert. | 12-NFM-S-A	Town
+Mitchelmore, Jazmine	90443408	Millwright Journeyman | 13-JM-S-H	Town
+Stevenson, Nathan	90157638	Millwright Journeyman | 13-JM-S-H	Town
+Serroul, Brandon	90125708	Millwright Apprentice 8 | 13-A8-S-H	Town
+Jackson, Ryan	90156540	Millwright Apprentice 7 | 13-A7-S-H	Town
+Beacom, David	90159864	Boilermaker Foreman Cert. | 2-FM-S-H	Town
+Fraser, Kelly	346467	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Town
+Macelheron, Sandy	66434	Iron Worker Craft Staff | 10-T101-S-A	Town
+Hassan, Bashir	90152183	Labourer Journeyman | 12-JM-S-A	Town
+Chellamani, Rajan	90154758	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
+Elgert, Alan	90108427	Pipefitter Journeyman | 16-JM-S-A	Camp
+Zimmerman, Wayne	90153363	Millwright Journeyman | 13-JM-S-A	Camp
+Serias, Edward	423507	Iron Worker (ST) Sheet Metal General Foreman | 10-G006-S-A	Town
+Upton, Lane	90115366	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-B	Camp
+Arndt, Karl	66550	Millwright Journeyman | 13-JM-S-H	Town
+Mckinnon, Matthew	90156830	Iron Worker (ST) Journeyman | 10-JM-S-A	Town
+Paterson, Clifford	90204604	Millwright Journeyman | 13-JM-S-A	Camp
+Mcintosh, Matthew	90153297	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-B	Camp
+Segal, Jaxxon	367664	Pipefitter Journeyman | 16-JM-S-B	Town
+Boutilier, Stephen	90115357	Iron Worker (ST) Sheet Metal General Foreman | 10-G006-S-A	Camp
+Wilson, Alexander	90416331	Millwright Journeyman | 13-JM-S-H	Town
+Weatherbie, Dustin	90157587	Pipefitter Journeyman | 16-JM-S-A	Camp
+Pederson, Bradley	90156257	Pipefitter Journeyman | 16-JM-S-B	Camp
+Pardy, Cameron	90158768	Millwright Journeyman | 13-JM-S-K	Town
+Percy, Dave	90152011	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Camp
+Arsenault, Randy	90428326	Iron Worker (ST) Foreman Welder | 10-FMW-S-A	Camp
+Elmi, Elias	535337	Iron Worker (ST) Journeyman Welder | 10-JMW-S-B	Camp
+Levasseur, David	90154248	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Nimmon, Patrick	90444571	Millwright Journeyman | 13-JM-S-B	Camp
+Rahime, Kalil	90157589	Millwright Apprentice 4 | 13-A4-S-A	Town
+Mullins, Robert	400014	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Gandey, Jason	78244	Planner/Scheduler II	Town
+Arlay, Fernando	66496	Quality Control Inspector III	Town
+Beaulieu, Darcy	90155673	Pipefitter Journeyman | 16-JM-S-B	Camp
+Ravena, Luis	90151853	Pipefitter Foreman Cert. | 16-FM-S-B	Camp
+Westlind, Carl	90159745	Iron Worker (ST) Sheet Metal General Foreman | 10-G006-S-B	Town
+Pavlyuk, Yuriy	90413226	Millwright Journeyman | 13-JM-S-B	Camp
+Gibbons, Christopher	90152661	Pipefitter Journeyman | 16-JM-S-A	Camp
+Plummer, Douglas	90146558	Pipefitter Journeyman | 16-JM-S-A	Camp
+Galenza, Steven	90151599	Pipefitter Journeyman | 16-JM-S-H	Town
+Lucas, Clay	90159252	Pipefitter Journeyman | 16-JM-S-B	Town
+Munro, Sally Anne	62481	Quality Control Inspector II	Town
+Crewe, Terrilynn	78099	Teamster Teamster Clerical 4 | 20-ADM4-L-H	Town
+Ringstad, Chris	90168058	Quality Control Inspector II	Town
+Makridakis, Emmanouil	90159265	Senior Material Controller	Town
+Masson, Dustin	90124347	Boilermaker General Foreman Cert. | 2-GF-B-A	Town
+Macneil, Shawn	90103208	Pipefitter Foreman Cert. | 16-FM-S-B	Camp
+Carter, Christopher	90401197	Boilermaker Journeyman | 2-JM-S-H	Town
+Fleming, Matthew	678817	Millwright Journeyman | 13-JM-S-H	Town
+Daly, Mathew D	90163188	Boilermaker General Foreman Cert. | 2-GF-B-A	Town
+Manick, Tommy	90152648	Pipefitter Alloy Welder Journeyman (R) | 16-JMRW-S-A	Camp
+Eirich, Viktor	90163185	Pipefitter Journeyman | 16-JM-S-A	Camp
+Bedard, Melanie	374010	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
+Warr, Lucas	90417237	Millwright Journeyman | 13-JM-S-H	Town
+William, Kiran	90155605	Quality Control Inspector II	Town
+Chibisa, Nyasha	648120	Pipefitter Journeyman | 16-JM-S-A	Town
+Morla-Bravo, Byron	647838	Boilermaker Journeyman Welder | 2-JMW-S-H	Town
+Saunders, Elwood	90151719	Millwright Journeyman (R) | 13-JMR-S-A	Town
+Offrey, Deana	79301	Teamster Teamster Clerical 4 | 20-ADM4-L-H	Town
+Suri, Prateek S	80003560	Millwright Journeyman | 13-JM-S-H	Town
+Rees, Andrew	90159494	Millwright Journeyman | 13-JM-S-A	Town
+O'Leary, Stephen	669415	Manager, Project HSE	Town
+Delorey, Blaise	622954	Pipefitter Journeyman | 16-JM-S-B	Camp
+Wittke, Tim	90151496	Quality Control Inspector III	Town
+Saini, Rajbir	90164385	Millwright Apprentice 2 | 13-A2-S-B	Town
+Wright, Joshua	388417	Millwright Apprentice 7 | 13-A7-S-H	Town
+Maki, Desirae	90163941	Millwright Apprentice 6 | 13-A6-S-A	Town
+Bako, Patrick	535295	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Poole, Allan	69592	Iron Worker (ST) Foreman Welder | 10-FMW-S-A	Town
+Fleming, Douglas	391842	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Walters, Nadia	143066	Teamster Teamster Clerical 4 | 20-ADM4-L-A	Town
+Batres, Maria	90413068	Pipefitter Apprentice 2 | 16-A2-S-B	Town
+Lee, Andrew	724302	Labourer Journeyman | 12-JM-S-A	Town
+Krysa, Robert	478747	Pipefitter Journeyman | 16-JM-S-B	Camp
+Theriault, Jean-Louis	90154650	Pipefitter Journeyman | 16-JM-S-A	Town
+Simpson, Andrew	90148997	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Unrau, Mike	77767	Pipefitter Journeyman | 16-JM-S-H	Town
+Leger, Philippe	90152063	Iron Worker (ST) Foreman Welder | 10-FMW-S-B	Town
+Beaton, Christina	90168517	Labourer Journeyman | 12-JM-S-A	Town
+Pennell, Ignatius	90168578	Labourer Journeyman | 12-JM-S-A	Town
+Yu, Qing Tao	90168662	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Camp
+Storoschuk, Cameron	90168614	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Macelheron, Thomas	90168860	Iron Worker (ST) Journeyman | 10-JM-S-A	Town
+Kong, Taean	90107618	Boilermaker Journeyman Alloy Welder | 2-JMAW-B-A	Camp
+Lareau, Michel	453135	Operations HSE Advisor | 13-T003-L-A	Town
+Blanchard, Cameron	90158803	Millwright Journeyman | 13-JM-S-H	Town
+Boos, Everett	90120689	Millwright Journeyman | 13-JM-S-H	Town
+Brown, Trevor	90153279	Labourer Journeyman Cert. | 12-JMC-S-A	Town
+Patel, Sabbirbhai	623486	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-A	Camp
+Murali, Manoharan	90182022	Quality Control Inspector II	Town
+Hann, Zachery	737795	Millwright Apprentice 5 | 13-A5-S-H	Town
+Mohamed, Mohamed	90190579	Labourer Journeyman | 12-JM-S-A	Town
+Been, Joungyeol	90190608	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-A	Camp
+Gouthro, Alex	90425517	Pipefitter Apprentice 4 | 16-A4-S-A	Camp
+Paez, Apolonio	90192183	Quality Control Inspector II	Town
+Dempsey, Rocky	90203806	Millwright Apprentice 7 | 13-A7-S-B	Town
+Mcnamee, David	408496	Pipefitter Journeyman | 16-JM-S-B	Camp
+Han, Bing Bing	708363	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Camp
+Lachance, Chris	90205350	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Camp
+Molloy, Jeffery	90413692	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Ivany, Stephen	707944	Pipefitter Apprentice 2 | 16-A2-S-B	Town
+Turnbull, John	367834	Boilermaker Foreman Welder | 2-FMW-B-A	Camp
+Kim, Yunsuk	633492	Iron Worker (ST) Journeyman Welder | 10-JMW-S-A	Camp
+Fofana, Abou	90402725	Pipefitter Journeyman | 16-JM-S-A	Camp
+Paavola, Richard	391577	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Hemeid, Hussein	80003664	Millwright Journeyman | 13-JM-S-H	Town
+Funston, Shannon	90134558	Iron Worker (ST) Apprentice 3 | 10-A3-S-B	Camp
+Allex, Nathaniel	90400705	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Camp
+Nielsen, Marc	90422546	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-A	Camp
+Gillis, Devon	90422555	Pipefitter Apprentice 4 | 16-A4-S-A	Camp
+Giroux, Michael	376030	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Byrne, Leonard	600143	Project HSE Advisor II	Camp
+Giroux, Aren	90427531	Pipefitter Journeyman | 16-JM-S-B	Camp
+Pidruchney, Anton	90149056	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
+Adams, Ronald	90427506	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Haggerty, Zandon	637098	Boilermaker Journeyman Welder | 2-JMW-B-A	Camp
+Vautour, Jonathan	90428513	Iron Worker (ST) Journeyman Welder | 10-JMW-S-B	Camp
+Vahora, Mahammadfaizan	90116549	Quality Control Inspector II	Town
+Hache, Eric	357725	Boilermaker Foreman Cert. | 2-FM-B-A	Camp
+Tlayjeh, Mohamed	90103570	Boilermaker Apprentice Welder 3 | 2-AW3-B-A	Camp
+De La Cruz, Yancee D	90432226	Boilermaker Apprentice 2 | 2-A2-B-A	Camp
+Kerik, Colin	90137235	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Yaholnitsky, Ernest	528794	Boilermaker Journeyman Welder | 2-JMW-B-A	Camp
+Leblanc, Kevin	624123	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Brewer, Robin	384791	Iron Worker (ST) Sheet Metal General Foreman | 10-G006-S-A	Town
+Warren, Kenny	90154536	Millwright Apprentice 8 | 13-A8-S-B	Town
+McCormack, Brian	90175079	Pipefitter Journeyman | 16-JM-S-B	Camp
+Boyd, Nicholas	478614	Pipefitter Journeyman | 16-JM-S-B	Camp
+Toklo, Seyram	90124312	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Camp
+Mattie, Evan	340972	Boilermaker Journeyman Welder | 2-JMW-B-A	Camp
+Vlooswyk, Tim	505779	Boilermaker Foreman Cert. | 2-FM-B-A	Town
+Perry, Morgan	547843	Pipefitter Journeyman | 16-JM-S-H	Town
+Ross, Alexander	90433584	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-A	Camp
+Dapnisan, Brian	66698	Labourer Journeyman | 12-JM-S-A	Town
+Hornberger, Daryn	90115360	Iron Worker (ST) Journeyman Alloy Welder | 10-JMAW-S-B	Camp
+Leger, Kevin	674835	Millwright Journeyman | 13-JM-S-B	Camp
+Cardinal, Stephanie	90125419	Iron Worker (ST) Apprentice 3 | 10-A3-S-A	Town
+Gao, Jing Xiang	90172112	Iron Worker (ST) Apprentice 3 | 10-A3-S-A	Camp
+Dales, Curtis	396319	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Rafuse, Michael	641821	Iron Worker (ST) Journeyman Welder | 10-JMW-S-A	Camp
+Vivanco, Raymond	90425288	Pipefitter Journeyman | 16-JM-S-H	Town
+Mohammed, Abdiqani	90405559	Pipefitter Journeyman | 16-JM-S-B	Town
+Patel, Nakul N	90115694	Quality Control Inspector I	Town
+Eirich, Maik	725695	Pipefitter Apprentice 3 | 16-A3-S-A	Town
+McCarty, Lisa	695290	Pipefitter Apprentice 4 | 16-A4-S-A	Camp
+Devolder, Devyn	90441098	Iron Worker (ST) Apprentice 1 | 10-A1-S-B	Camp
+Sereda, Michael	90441102	Millwright Journeyman | 13-JM-S-B	Camp
+Tupper, Clive	73695	Pipefitter Journeyman | 16-JM-S-A	Town
+Roy, Remi	616489	Iron Worker (ST) Journeyman | 10-JM-S-A	Town
+Alame, Raghed	312616	Pipefitter Journeyman | 16-JM-S-H	Town
+Bertoli, Dean	90109887	Boilermaker General Foreman Cert. | 2-GF-B-A	Camp
+McRobb, Austin	577862	Millwright Journeyman | 13-JM-S-H	Town
+Doe, Timothy	381503	Millwright Journeyman Welder | 13-JMW-S-B	Camp
+Boudreau, Jacob	90444485	Iron Worker (ST) Foreman Cert. | 10-FM-S-A	Town
+Peerzada, Aasim	90445337	Quality Control Inspector I	Town
+White, Ernest	90119629	Millwright Journeyman (R) | 13-JMR-S-H	Town
+Ziorio, Daniel	90449617	Pipefitter Apprentice 3 | 16-A3-S-B	Camp
+Tuasa-Nga, Thirapricha	90158892	Pipefitter Apprentice 4 | 16-A4-S-B	Camp
+Bartley, David	90147353	Pipefitter Journeyman | 16-JM-S-H	Town
+Ristoski, Mihail	90100998	Boilermaker Journeyman Welder | 2-JMW-B-A	Camp
+Donecz, Aedyn	90451309	Iron Worker (ST) Apprentice 1 | 10-A1-S-A	Camp
+Lemmerick, Shane	90137981	Iron Worker (ST) Journeyman Welder | 10-JMW-S-A	Camp
+Rees, Christopher	66921	Labourer Foreman Non Cert. | 12-NFM-S-H	Town
+Lewis, Wade	90445995	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Navas, Luis	583185	Iron Worker (ST) Journeyman Welder | 10-JMW-S-A	Camp
+Maiwka, John	90424339	Boilermaker Apprentice Welder 1 | 2-AW1-B-A	Camp
+Fritzler, Kurtis	90207405	Boilermaker Apprentice 2 | 2-A2-B-A	Camp
+Kang, Peter	579300	Boilermaker Journeyman Welder | 2-JMW-B-A	Camp
+Murphy-Caines, Jade	728958	Pipefitter Apprentice Welder 1 | 16-AW1-S-A	Camp
+Duclos, J-Luc	90116363	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
+Aruleba, Adeyemi	90138527	Pipefitter Apprentice 1 | 16-A1-S-A	Town
+Wang, Gang	722412	Millwright Journeyman | 13-JM-S-A	Camp
+Allen, Tyler	90116383	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Davey, Grant	617965	Iron Worker (ST) Journeyman | 10-JM-S-B	Camp
+Sweetapple, Steven	377859	Pipefitter Journeyman | 16-JM-S-H	Town
+Truong, Thomas	590373	Boilermaker Foreman Cert. | 2-FM-B-A	Camp
+Laitha, Sombun	90104415	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-H	Town
+Noseworthy, Barry	90448065	Boilermaker Foreman Cert. | 2-FM-B-A	Camp
+McLellan, Michael	90132498	Quality Control Inspector II	Town
+Armstrong, Russell	347151	Quality Control Inspector II	Town
+`.trim();
+
+    // --- Parse embedded TSV into roster objects (dedupe by SUNID)
+    function parseRoster(tsv) {
+      const lines = tsv.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const out = [];
+      for (const line of lines) {
+        const parts = line.split(/\t+/);
+        if (parts.length < 4) continue;
+        const [name, suncorId, classification, location] = parts.map(s => s.trim());
+        if (SKIP_NAMES.has(name)) continue;
+        out.push({ name, suncorId, classification, location });
+      }
+      // dedupe by SUNID
+      const byId = new Map();
+      for (const w of out) if (!byId.has(w.suncorId)) byId.set(w.suncorId, w);
+      return Array.from(byId.values());
+    }
+
+    let crewRoster = parseRoster(ROSTER_TSV);
+
+    // ====== DOM refs
+    const addRowBtn = document.getElementById('add-row-btn');
+    const crewTableBody = document.getElementById('crew-table-body');
+    const generatePdfBtn = document.getElementById('generate-pdf-btn');
+    const dateInput = document.getElementById('date');
+    const signatureModal = document.getElementById('signature-modal');
+    const signaturePad = document.getElementById('signature-pad');
+    const clearSignatureBtn = document.getElementById('clear-signature-btn');
+    const saveSignatureBtn = document.getElementById('save-signature-btn');
+    const messageModal = document.getElementById('message-modal');
+    const messageTitle = document.getElementById('message-title');
+    const messageText = document.getElementById('message-text');
+    const messageOkBtn = document.getElementById('message-ok-btn');
+
+    // ====== Signature pad logic
+    const ctx = signaturePad.getContext('2d');
+    let drawing = false;
+    let currentRowForSignature = null;
+
+    function getMousePos(canvas, evt) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const t = evt.touches && evt.touches[0];
+      const clientX = t ? t.clientX : evt.clientX;
+      const clientY = t ? t.clientY : evt.clientY;
+      return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+    }
+    function startDrawing(e){ drawing = true; const p = getMousePos(signaturePad, e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+    function draw(e){ if(!drawing) return; e.preventDefault(); const p = getMousePos(signaturePad, e); ctx.lineTo(p.x,p.y); ctx.strokeStyle='#333'; ctx.lineWidth=2; ctx.stroke(); }
+    function stopDrawing(){ drawing=false; ctx.beginPath(); }
+    function clearCanvas(){ ctx.clearRect(0,0,signaturePad.width,signaturePad.height); }
+    function openSignatureModal(row){ currentRowForSignature=row; clearCanvas(); signatureModal.classList.remove('hidden'); }
+    function closeSignatureModal(){ signatureModal.classList.add('hidden'); currentRowForSignature=null; }
+    function showMessage(title,text){ messageTitle.textContent=title; messageText.textContent=text; messageModal.classList.remove('hidden'); }
+
+    // ====== UI helpers
+    const svgTrash = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0V5a2 2 0 012-2h2a2 2 0 012 2v2" />
+      </svg>`;
+
+    function buildNameSelect() {
+      const sel = document.createElement('select');
+      sel.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2 form-select';
+      const opt0 = document.createElement('option'); opt0.value=''; opt0.textContent='Select a worker...'; sel.appendChild(opt0);
+      const sorted = [...crewRoster].sort((a,b)=>a.name.localeCompare(b.name));
+      for (const w of sorted) {
+        const o = document.createElement('option');
+        o.value = w.name;
+        o.textContent = w.name;
+        sel.appendChild(o);
+      }
+      const optAdd = document.createElement('option'); optAdd.value='_addNew_'; optAdd.textContent='--- Add New Worker ---';
+      sel.appendChild(optAdd);
+      return sel;
+    }
+
+    function addCrewRow() {
+      const rowId = `row-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+      const mainRow = document.createElement('tr');
+      const subRow  = document.createElement('tr');
+      mainRow.id = rowId;
+      mainRow.className = 'bg-white hover:bg-gray-50 align-middle main-row';
+      subRow.className  = 'bg-white hover:bg-gray-50 align-middle sub-row';
+
+      mainRow.innerHTML = `
+        <td class="px-4 py-2">
+          <input type="text" placeholder="e.g., Unit 5"
+            class="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2">
+        </td>
+        <td class="px-4 py-2">
+          <div class="flex items-center gap-2">
+            <div class="flex-1 name-cell"></div>
+            <button class="remove-row no-print text-red-600 hover:text-red-700 p-1 rounded" title="Remove row">
+              ${svgTrash}
             </button>
-        </div>
-    </div>
+          </div>
+        </td>
+        <td class="px-4 py-2">
+          <input type="text" data-field="suncorId" placeholder="Suncor ID"
+            class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
+        </td>
+        <td class="px-4 py-2">
+          <input type="text" data-field="classification" placeholder="Classification"
+            class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
+        </td>`;
 
-    <!-- Signature Modal -->
-    <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto">
-            <h3 class="text-xl font-bold mb-4">Provide Signature</h3>
-            <canvas id="signature-pad" width="400" height="200"></canvas>
-            <div class="flex justify-between mt-4">
-                <button id="clear-signature-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Clear</button>
-                <button id="save-signature-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Save Signature</button>
+      subRow.innerHTML = `
+        <td colspan="4">
+          <div class="flex items-center space-x-4 pl-2">
+            <div class="signature-cell text-center">
+              <button class="sign-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded">Sign</button>
             </div>
-        </div>
-    </div>
-    
-    <!-- Message Modal -->
-    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
-        <div class="bg-white rounded-xl shadow-2xl p-8 w-11/12 max-w-md mx-auto text-center">
-            <h3 id="message-title" class="text-2xl font-bold mb-4"></h3>
-            <p id="message-text" class="text-gray-700 mb-6"></p>
-            <button id="message-ok-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">OK</button>
-        </div>
-    </div>
+            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Late:</label><input type="checkbox" data-field="isLate" class="form-checkbox"></div>
+            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Absent:</label><input type="checkbox" data-field="isAbsent" class="form-checkbox"></div>
+            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Training:</label><input type="checkbox" data-field="isTraining" class="form-checkbox"></div>
+            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Camp:</label><input type="checkbox" data-field="isCamp" class="form-checkbox"></div>
+            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Town:</label><input type="checkbox" data-field="isTown" class="form-checkbox"></div>
+          </div>
+        </td>`;
 
-    <script type="module">
-        // --- PRE-POPULATED CREW ROSTER ---
-        const crewRoster = [
-            { name: 'Campbell, Adam', suncorId: '90152831', classification: 'Iron Worker (ST) Journeyman', location: 'Camp' },
-            { name: 'Jeong, Yeongcheol', suncorId: '90412650', classification: 'Pipefitter Journeyman Alloy Welder', location: 'Camp' },
-            { name: 'Power, Kevin', suncorId: '66014', classification: 'Senior Superintendent, Site Maintenance', location: 'Town' },
-            { name: 'Macdonald, Allan', suncorId: '90157664', classification: 'Labourer Journeyman', location: 'Town' },
-            { name: 'Rabbit, Lawrence', suncorId: '90151443', classification: 'Boilermaker Journeyman Welder', location: 'Camp' },
-            { name: 'Walsh, Saranne', suncorId: '90124091', classification: 'Millwright Apprentice 4', location: 'Town' },
-            { name: 'Ozolins, Rollie', suncorId: '90159315', classification: 'Pipefitter General Foreman Cert.', location: 'Town' },
-            { name: 'Hutsulak, Richard', suncorId: '90428404', classification: 'Boilermaker Journeyman Welder', location: 'Camp' },
-            { name: 'Antle, Chris', suncorId: '90151350', classification: 'Superintendent, Site Maintenance', location: 'Town' },
-            { name: 'Martin, Trina', suncorId: '66449', classification: 'Senior Project Control Specialist', location: 'Town' },
-            { name: 'Keating, William', suncorId: '90159400', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Ok, Minwook', suncorId: '90412648', classification: 'Pipefitter Journeyman Alloy Welder', location: 'Camp' },
-            { name: 'Hickey, Robert', suncorId: '90412647', classification: 'Pipefitter Journeyman Alloy Welder', location: 'Camp' },
-            { name: 'Parsons, Joshua', suncorId: '90159401', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Macneil, Ryan', suncorId: '90151405', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Mccarron, Brett', suncorId: '90151408', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Benoit, Matthew', suncorId: '90151359', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Emberley, Justin', suncorId: '90151375', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'White, Stephen', suncorId: '90151439', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Drover, Christopher', suncorId: '90151373', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Caines, Gregory', suncorId: '90151366', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Noseworthy, Cody', suncorId: '90151415', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Heffernan, Michael', suncorId: '90151387', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Durnford, Johnathon', suncorId: '90151374', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Butt, Justin', suncorId: '90151365', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Smith, Jesse', suncorId: '90151428', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hiscock, David', suncorId: '90151392', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Russell, Cody', suncorId: '90151424', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hillier, Andrew', suncorId: '90151390', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Clarke, Andrew', suncorId: '90151368', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Lee, Gyeong Min', suncorId: '90412649', classification: 'Pipefitter Journeyman Alloy Welder', location: 'Camp' },
-            { name: 'Gillingham, Gregory', suncorId: '90151381', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Clarke, Jordan', suncorId: '90151369', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hiscock, Jonathan', suncorId: '90151393', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Leonard, Christopher', suncorId: '90151401', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Harnum, Christopher', suncorId: '90151384', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'May, Mitchell', suncorId: '90151407', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'King, Jordan', suncorId: '90151398', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Buckle, Daniel', suncorId: '90151364', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Barron, Adam', suncorId: '90151356', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Lee, Mitchell', suncorId: '90151400', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Barrett, Joshua', suncorId: '90151355', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Langer, Jordan', suncorId: '90151399', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Reid, Sheldon', suncorId: '90151422', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Reid, Adam', suncorId: '90151421', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Ward, Joshua', suncorId: '90151437', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Doyle, Brandon', suncorId: '90151372', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Noseworthy, Jordan', suncorId: '90151416', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Stone, Ryan', suncorId: '90151431', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hartery, Brandon', suncorId: '90151385', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Power, Mitchell', suncorId: '90151419', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Slaney, Corey', suncorId: '90151427', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Critch, Andrew', suncorId: '90151371', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hodder, Ryan', suncorId: '90151394', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hicks, Adam', suncorId: '90151389', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hiscock, Joshua', suncorId: '90151391', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Boland, Zachary', suncorId: '90151362', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Kelly, Andrew', suncorId: '90151397', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hynes, Kyle', suncorId: '90151396', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Barron, Joshua', suncorId: '90151357', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Pardy, Brandon', suncorId: '90151417', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Samson, Gregory', suncorId: '90151425', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Hillyard, Cody', suncorId: '90151388', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Greene, Devon', suncorId: '90151383', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Strickland, Brandon', suncorId: '90151432', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Careen, Brandon', suncorId: '90151367', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Mercer, Jordan', suncorId: '90151410', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Smith, Evan', suncorId: '90151429', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Wicks, Brandon', suncorId: '90151440', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Dalton, Joshua', suncorId: '90151370', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Sooley, Brandon', suncorId: '90151430', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Tarrant, Brandon', suncorId: '90151434', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Petten, Ryan', suncorId: '90151418', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Morgan, Riley', suncorId: '90151412', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Morgan, Nicholas', suncorId: '90151411', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Sturge, Joshua', suncorId: '90151433', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Walsh, Brandon', suncorId: '90151435', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Walsh, Adam', suncorId: '90151436', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Taylor, Evan', suncorId: '90151435', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Thomas, Jordan', suncorId: '90151438', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Pinsent, Jordan', suncorId: '90151420', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Seward, Zachary', suncorId: '90151426', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Bishop, Brandon', suncorId: '90151360', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Bishop, Riley', suncorId: '90151361', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Gosse, Brandon', suncorId: '90151382', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Murrins, Brandon', suncorId: '90151413', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Murrins, Tyler', suncorId: '90151414', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Newhook, Brandon', suncorId: '90151414', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Barnes, Jordan', suncorId: '90151354', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Boland, Brandon', suncorId: '90151363', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Gosse, Jordan', suncorId: '90159402', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Gosse, Riley', suncorId: '90159403', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Clarke, Brandon', suncorId: '90159404', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Reid, Brandon', suncorId: '90159405', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Reid, Riley', suncorId: '90159406', classification: 'Pipefitter Journeyman', location: 'Town' },
-            { name: 'Ristoski, Mihail', suncorId: '90100998', classification: 'Boilermaker Journeyman Welder', location: 'Camp' },
-            { name: 'Donecz, Aedyn', suncorId: '90451309', classification: 'Iron Worker (ST) Apprentice 1', location: 'Camp' },
-            { name: 'Lemmerick, Shane', suncorId: '90137981', classification: 'Iron Worker (ST) Journeyman Welder', location: 'Camp' },
-            { name: 'Rees, Christopher', suncorId: '66921', classification: 'Labourer Foreman Non Cert.', location: 'Town' },
-            { name: 'Lewis, Wade', suncorId: '90445995', classification: 'Iron Worker (ST) Journeyman', location: 'Camp' },
-            { name: 'Navas, Luis', suncorId: '583185', classification: 'Iron Worker (ST) Journeyman Welder', location: 'Camp' },
-            { name: 'Maiwka, John', suncorId: '90424339', classification: 'Boilermaker Apprentice Welder 1', location: 'Camp' },
-            { name: 'Fritzler, Kurtis', suncorId: '90207405', classification: 'Boilermaker Apprentice 2', location: 'Camp' },
-            { name: 'Kang, Peter', suncorId: '579300', classification: 'Boilermaker Journeyman Welder', location: 'Camp' },
-            { name: 'Murphy-Caines, Jade', suncorId: '728958', classification: 'Pipefitter Apprentice Welder 1', location: 'Camp' }
-        ].sort((a, b) => a.name.localeCompare(b.name));
+      crewTableBody.appendChild(mainRow);
+      crewTableBody.appendChild(subRow);
 
-        // --- DOM ELEMENT REFERENCES ---
-        const dateInput = document.getElementById('date');
-        const addRowBtn = document.getElementById('add-row-btn');
-        const crewTableBody = document.getElementById('crew-table-body');
-        const generatePdfBtn = document.getElementById('generate-pdf-btn');
-        const signatureModal = document.getElementById('signature-modal');
-        const signaturePad = document.getElementById('signature-pad');
-        const clearSignatureBtn = document.getElementById('clear-signature-btn');
-        const saveSignatureBtn = document.getElementById('save-signature-btn');
-        const messageModal = document.getElementById('message-modal');
-        const messageTitle = document.getElementById('message-title');
-        const messageText = document.getElementById('message-text');
-        const messageOkBtn = document.getElementById('message-ok-btn');
+      const nameCell = mainRow.querySelector('.name-cell');
+      const nameSelect = buildNameSelect();
+      nameCell.appendChild(nameSelect);
 
-        // --- SIGNATURE PAD LOGIC ---
-        const ctx = signaturePad.getContext('2d');
-        let drawing = false;
-        let currentRowForSignature = null;
+      subRow.querySelector('.sign-btn').addEventListener('click', () => openSignatureModal(subRow));
+      mainRow.querySelector('.remove-row').addEventListener('click', () => { mainRow.remove(); subRow.remove(); });
 
-        function getMousePos(canvas, evt) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const clientX = evt.clientX || (evt.touches && evt.touches[0].clientX);
-            const clientY = evt.clientY || (evt.touches && evt.touches[0].clientY);
-            return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-        }
+      nameSelect.addEventListener('change', (e) => handleNameSelection(e, mainRow, subRow));
+    }
 
-        function startDrawing(e) { drawing = true; const pos = getMousePos(signaturePad, e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
-        function draw(e) { if (!drawing) return; e.preventDefault(); const pos = getMousePos(signaturePad, e); ctx.lineTo(pos.x, pos.y); ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke(); }
-        function stopDrawing() { drawing = false; ctx.beginPath(); }
-        function clearCanvas() { ctx.clearRect(0, 0, signaturePad.width, signaturePad.height); }
+    function handleNameSelection(e, mainRow, subRow) {
+      const selectedValue = e.target.value;
+      const suncorIdInput = mainRow.querySelector('input[data-field="suncorId"]');
+      const classInput   = mainRow.querySelector('input[data-field="classification"]');
+      const campCheckbox = subRow.querySelector('input[data-field="isCamp"]');
+      const townCheckbox = subRow.querySelector('input[data-field="isTown"]');
 
-        // --- MODAL & UI LOGIC ---
-        function openSignatureModal(row) { currentRowForSignature = row; clearCanvas(); signatureModal.classList.remove('hidden'); }
-        function closeSignatureModal() { signatureModal.classList.add('hidden'); currentRowForSignature = null; }
-        function showMessage(title, text) { messageTitle.textContent = title; messageText.textContent = text; messageModal.classList.remove('hidden'); }
+      if (selectedValue === '_addNew_') {
+        const textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.placeholder = 'First/Last Name';
+        textInput.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2';
+        e.target.replaceWith(textInput);
+        textInput.focus();
 
-        // --- DATA & TABLE LOGIC ---
-        function addCrewRow() {
-            const rowId = `row-${Date.now()}`;
-            const mainRow = document.createElement('tr');
-            const subRow = document.createElement('tr');
+        suncorIdInput.value = '';
+        classInput.value = '';
+        suncorIdInput.readOnly = false; classInput.readOnly = false;
+        suncorIdInput.classList.remove('bg-gray-100'); classInput.classList.remove('bg-gray-100');
+        campCheckbox.checked = false; townCheckbox.checked = false;
+        campCheckbox.disabled = false; townCheckbox.disabled = false;
+        return;
+      }
 
-            mainRow.id = rowId;
-            mainRow.className = 'bg-white hover:bg-gray-50 align-middle main-row';
-            subRow.className = 'bg-white hover:bg-gray-50 align-middle sub-row';
-            
-            mainRow.innerHTML = `
-                <td class="px-4 py-2">
-                    <input type="text" placeholder="e.g., Unit 5" class="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2">
-                </td>
-                <td class="px-4 py-2 name-cell-container"></td>
-                <td class="px-4 py-2">
-                    <input type="text" data-field="suncorId" placeholder="Suncor ID" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
-                </td>
-                <td class="px-4 py-2">
-                    <input type="text" data-field="classification" placeholder="Classification" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
-                </td>
-            `;
-            
-            subRow.innerHTML = `
-                <td colspan="4">
-                    <div class="flex items-center space-x-4 pl-2">
-                        <div class="signature-cell text-center">
-                            <button class="sign-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded">Sign</button>
-                        </div>
-                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Late:</label><input type="checkbox" data-field="isLate" class="form-checkbox"></div>
-                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Absent:</label><input type="checkbox" data-field="isAbsent" class="form-checkbox"></div>
-                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Training:</label><input type="checkbox" data-field="isTraining" class="form-checkbox"></div>
-                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Camp:</label><input type="checkbox" data-field="isCamp" class="form-checkbox"></div>
-                        <div class="flex items-center space-x-2"><label class="text-xs font-medium">Town:</label><input type="checkbox" data-field="isTown" class="form-checkbox"></div>
-                        <button class="delete-row-btn text-red-500 hover:text-red-700 font-bold ml-auto pr-4">X</button>
-                    </div>
-                </td>
-            `;
+      const w = crewRoster.find(x => x.name === selectedValue);
+      if (w) {
+        suncorIdInput.value = w.suncorId || '';
+        classInput.value = w.classification || '';
+        suncorIdInput.readOnly = true; classInput.readOnly = true;
+        suncorIdInput.classList.add('bg-gray-100'); classInput.classList.add('bg-gray-100');
+        campCheckbox.checked = (w.location || '').toLowerCase() === 'camp';
+        townCheckbox.checked = (w.location || '').toLowerCase() === 'town';
+        campCheckbox.disabled = true; townCheckbox.disabled = true;
+      } else {
+        suncorIdInput.value = ''; classInput.value = '';
+        suncorIdInput.readOnly = false; classInput.readOnly = false;
+        suncorIdInput.classList.remove('bg-gray-100'); classInput.classList.remove('bg-gray-100');
+        campCheckbox.checked = false; townCheckbox.checked = false;
+        campCheckbox.disabled = false; townCheckbox.disabled = false;
+      }
+    }
 
-            // Build the Name cell with a select + inline trash button
-            const nameCellContainer = mainRow.querySelector('.name-cell-container');
-            const wrapper = document.createElement('div');
-            wrapper.className = 'flex items-center gap-2';
+    // PDF generation
+    function handlePdfGeneration() {
+      const projectInput = document.getElementById('project');
+      if (!projectInput.value.trim()) {
+        showMessage('Cannot Generate PDF', 'Please enter a Project / Job # before generating the PDF.');
+        return;
+      }
+      const element = document.getElementById('form-container');
+      const file = `${projectInput.value.replace(/[^a-z0-9]/gi,'_')}_${dateInput.value}.pdf`;
+      const opt = {
+        margin: .25, filename: file,
+        image: { type:'jpeg', quality:.98 },
+        html2canvas: { scale:2, useCORS:true },
+        jsPDF: { unit:'in', format:'letter', orientation:'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
 
-            const nameSelect = document.createElement('select');
-            nameSelect.className = 'flex-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2 form-select';
+    // Events
+    dateInput.valueAsDate = new Date();
+    document.getElementById('add-row-btn').addEventListener('click', addCrewRow);
+    document.getElementById('generate-pdf-btn').addEventListener('click', handlePdfGeneration);
 
-            let defaultOption = document.createElement('option');
-            defaultOption.textContent = 'Select a worker...';
-            defaultOption.value = '';
-            nameSelect.appendChild(defaultOption);
+    const signaturePadEl = document.getElementById('signature-pad');
+    signaturePadEl.addEventListener('mousedown', startDrawing);
+    signaturePadEl.addEventListener('mousemove', draw);
+    signaturePadEl.addEventListener('mouseup', stopDrawing);
+    signaturePadEl.addEventListener('mouseleave', stopDrawing);
+    signaturePadEl.addEventListener('touchstart', startDrawing, { passive:false });
+    signaturePadEl.addEventListener('touchmove', draw, { passive:false });
+    signaturePadEl.addEventListener('touchend', stopDrawing, { passive:false });
 
-            crewRoster.forEach(worker => {
-                let option = document.createElement('option');
-                option.textContent = worker.name;
-                option.value = worker.name;
-                nameSelect.appendChild(option);
-            });
+    document.getElementById('clear-signature-btn').addEventListener('click', clearCanvas);
+    document.getElementById('save-signature-btn').addEventListener('click', () => {
+      if (!currentRowForSignature) return;
+      const signatureDataUrl = signaturePad.toDataURL('image/png');
+      const signatureCell = currentRowForSignature.querySelector('.signature-cell');
+      const img = document.createElement('img');
+      img.src = signatureDataUrl; img.classList.add('signature-image');
+      signatureCell.innerHTML = ''; signatureCell.appendChild(img);
+      closeSignatureModal();
+    });
+    document.getElementById('message-ok-btn').addEventListener('click', () => messageModal.classList.add('hidden'));
 
-            let addNewOption = document.createElement('option');
-            addNewOption.textContent = '--- Add New Worker ---';
-            addNewOption.value = '_addNew_';
-            nameSelect.appendChild(addNewOption);
-
-            // Trash icon button (inline)
-            const deleteInlineBtn = document.createElement('button');
-            deleteInlineBtn.type = 'button';
-            deleteInlineBtn.className = 'no-print p-2 rounded hover:bg-red-50';
-            deleteInlineBtn.title = 'Remove this crew member';
-            deleteInlineBtn.setAttribute('aria-label', 'Remove this crew member');
-            deleteInlineBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 hover:text-red-700" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 100 2h.278l.84 9.243A3 3 0 008.107 18h3.786a3 3 0 002.99-2.757L15.722 6H16a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM8 8a1 1 0 112 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"/>
-                </svg>
-            `;
-
-            wrapper.appendChild(nameSelect);
-            wrapper.appendChild(deleteInlineBtn);
-            nameCellContainer.appendChild(wrapper);
-
-            crewTableBody.appendChild(mainRow);
-            crewTableBody.appendChild(subRow);
-
-            // Events
-            deleteInlineBtn.addEventListener('click', () => { mainRow.remove(); subRow.remove(); });
-            subRow.querySelector('.sign-btn').addEventListener('click', () => openSignatureModal(subRow));
-            subRow.querySelector('.delete-row-btn').addEventListener('click', () => { mainRow.remove(); subRow.remove(); });
-            nameSelect.addEventListener('change', (e) => handleNameSelection(e, mainRow, subRow));
-        }
-
-        function handleNameSelection(e, mainRow, subRow) {
-            const selectedValue = e.target.value;
-            const suncorIdInput = mainRow.querySelector('input[data-field="suncorId"]');
-            const classInput = mainRow.querySelector('input[data-field="classification"]');
-            const campCheckbox = subRow.querySelector('input[data-field="isCamp"]');
-            const townCheckbox = subRow.querySelector('input[data-field="isTown"]');
-
-            if (selectedValue === '_addNew_') {
-                // Swap the select for a free-text input, keep the inline trash button
-                const textInput = document.createElement('input');
-                textInput.type = 'text';
-                textInput.placeholder = 'First/Last Name';
-                textInput.className = 'flex-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2';
-                e.target.replaceWith(textInput);
-                textInput.focus();
-
-                suncorIdInput.value = '';
-                classInput.value = '';
-                suncorIdInput.readOnly = false;
-                classInput.readOnly = false;
-                suncorIdInput.classList.remove('bg-gray-100');
-                classInput.classList.remove('bg-gray-100');
-
-                campCheckbox.checked = false;
-                townCheckbox.checked = false;
-                campCheckbox.disabled = false;
-                townCheckbox.disabled = false;
-
-            } else {
-                const selectedWorker = crewRoster.find(w => w.name === selectedValue);
-                if (selectedWorker) {
-                    suncorIdInput.value = selectedWorker.suncorId;
-                    classInput.value = selectedWorker.classification;
-                    suncorIdInput.readOnly = true;
-                    classInput.readOnly = true;
-                    suncorIdInput.classList.add('bg-gray-100');
-                    classInput.classList.add('bg-gray-100');
-
-                    campCheckbox.checked = selectedWorker.location === 'Camp';
-                    townCheckbox.checked = selectedWorker.location === 'Town';
-                    campCheckbox.disabled = true;
-                    townCheckbox.disabled = true;
-
-                } else {
-                    suncorIdInput.value = '';
-                    classInput.value = '';
-                    suncorIdInput.readOnly = false;
-                    classInput.readOnly = false;
-                    suncorIdInput.classList.remove('bg-gray-100');
-                    classInput.classList.remove('bg-gray-100');
-
-                    campCheckbox.checked = false;
-                    townCheckbox.checked = false;
-                    campCheckbox.disabled = false;
-                    townCheckbox.disabled = false;
-                }
-            }
-        }
-        
-        function handlePdfGeneration() {
-            const projectInput = document.getElementById('project');
-            const dateInput = document.getElementById('date');
-
-            if (!projectInput.value.trim()) {
-                showMessage('Cannot Generate PDF', 'Please enter a Project / Job # before generating the PDF.');
-                return;
-            }
-
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-            if (isIOS) {
-                window.print();
-            } else {
-                const element = document.getElementById('form-container');
-                const filename = `${projectInput.value.replace(/[^a-z0-9]/gi, '_')}_${dateInput.value}.pdf`;
-                const opt = {
-                    margin: 0.25,
-                    filename,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                };
-                html2pdf().set(opt).from(element).save();
-            }
-        }
-
-        // --- EVENT LISTENERS & INITIALIZATION ---
-        dateInput.valueAsDate = new Date();
-        addRowBtn.addEventListener('click', addCrewRow);
-        generatePdfBtn.addEventListener('click', handlePdfGeneration);
-        clearSignatureBtn.addEventListener('click', clearCanvas);
-        messageOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
-
-        saveSignatureBtn.addEventListener('click', () => {
-            if (!currentRowForSignature) return;
-            const signatureDataUrl = signaturePad.toDataURL('image/png');
-            const signatureCell = currentRowForSignature.querySelector('.signature-cell');
-            const sigImage = document.createElement('img');
-            sigImage.src = signatureDataUrl;
-            sigImage.classList.add('signature-image');
-            signatureCell.innerHTML = '';
-            signatureCell.appendChild(sigImage);
-            closeSignatureModal();
-        });
-
-        signaturePad.addEventListener('mousedown', startDrawing);
-        signaturePad.addEventListener('mousemove', draw);
-        signaturePad.addEventListener('mouseup', stopDrawing);
-        signaturePad.addEventListener('mouseleave', stopDrawing);
-        signaturePad.addEventListener('touchstart', startDrawing, { passive: false });
-        signaturePad.addEventListener('touchmove', draw, { passive: false });
-        signaturePad.addEventListener('touchend', stopDrawing, { passive: false });
-
-        // Add first blank row
-        addCrewRow();
-    </script>
-
+    // Start with one blank row
+    addCrewRow();
+  </script>
 </body>
 </html>
