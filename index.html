@@ -1,75 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CAM Industrial - Digital Attendance Sheet</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CAM Industrial – Digital Attendance Sheet</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    :root { color-scheme: light; }
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
     #signature-pad { border: 2px dashed #cbd5e1; border-radius: .5rem; cursor: crosshair; }
     ::placeholder { color: #94a3b8; }
-    input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
-    input[type="checkbox"]:disabled { background-color:#e5e7eb; border-color:#d1d5db; cursor:not-allowed; }
-    button { transition: all .2s ease-in-out; }
-    .form-select {
-      background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-      background-position:right .5rem center;background-repeat:no-repeat;background-size:1.5em 1.5em;padding-right:2.5rem;appearance:none;
-    }
-    .signature-image { height:40px;width:120px;object-fit:contain;border:1px solid #e5e7eb;border-radius:.25rem; }
-    .sub-row td { padding-top:.5rem;padding-bottom:1rem;padding-left:1rem;border-bottom:1px solid #e5e7eb; }
-    .main-row td { padding-bottom:0;border-bottom:none; }
+    .form-select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right .5rem center; background-repeat: no-repeat; background-size: 1.25em 1.25em; padding-right: 2rem; appearance: none; }
+    .signature-image { height: 40px; width: 120px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: .25rem; }
+    .sub-row td { padding-top: .5rem; padding-bottom: 1rem; padding-left: 1rem; border-bottom: 1px solid #e5e7eb; }
+    .main-row td { padding-bottom: 0; border-bottom: none; }
+    .icon-btn { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:.5rem; border:1px solid #e5e7eb; background:#fff; }
+    .icon-btn:hover { background:#fee2e2; border-color:#fecaca; }
     @media print {
-      .no-print { display:none !important; }
-      @page { size: letter portrait; margin: .5in; }
+      .no-print { display: none !important; }
+      @page { size: letter portrait; margin: 0.5in; }
     }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-
   <div id="form-container" class="container mx-auto max-w-screen-xl p-4 sm:p-6 lg:p-8">
     <!-- Header -->
     <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-        <img src="https://i.ibb.co/yV28wVz/Cam-Logo-Side-ways.png" alt="CAM Industrial Solutions Logo"
-             class="h-12 mb-4 sm:mb-0" crossorigin="anonymous"
-             onerror="this.onerror=null;this.src='https://placehold.co/200x50/003366/FFFFFF?text=CAM+Logo';">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <!-- Logo (direct URL; no extra hosting needed) -->
+        <img
+          src="https://i.ibb.co/yV28wVz/Cam-Logo-Side-ways.png"
+          alt="CAM Industrial Solutions"
+          class="h-12"
+          crossorigin="anonymous"
+          onerror="this.onerror=null;this.src='https://placehold.co/240x48/EF4444/ffffff?text=CAM+Logo';"
+        />
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Digital Attendance Sheet</h1>
       </div>
 
-      <!-- Header info -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
+      <!-- Header fields -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 mt-4">
         <div class="flex flex-col">
           <label for="project" class="text-sm font-medium text-gray-600 mb-1">Project / Job #</label>
-          <input type="text" id="project" placeholder="e.g., Coker Unit Turnaround"
-                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          <input id="project" type="text" placeholder="e.g., Coker Unit Turnaround"
+                 class="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
         </div>
         <div class="flex flex-col">
           <label for="date" class="text-sm font-medium text-gray-600 mb-1">Date</label>
-          <input type="date" id="date"
-                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          <input id="date" type="date"
+                 class="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
         </div>
         <div class="flex flex-col">
           <label for="outage" class="text-sm font-medium text-gray-600 mb-1">Outage</label>
-          <input type="text" id="outage" placeholder="e.g., Spring 2025"
-                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          <input id="outage" type="text" placeholder="e.g., Spring 2025"
+                 class="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
         </div>
         <div class="flex flex-col">
           <label for="manager" class="text-sm font-medium text-gray-600 mb-1">Manager</label>
-          <input type="text" id="manager" placeholder="Manager's Name"
-                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          <input id="manager" type="text" placeholder="Manager's Name"
+                 class="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
         </div>
         <div class="flex flex-col">
           <label for="supervisor" class="text-sm font-medium text-gray-600 mb-1">Supervisor</label>
-          <input type="text" id="supervisor" placeholder="Supervisor's Name"
-                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          <input id="supervisor" type="text" placeholder="Supervisor's Name"
+                 class="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
         </div>
         <div class="flex flex-col">
           <label for="foreperson" class="text-sm font-medium text-gray-600 mb-1">Foreperson</label>
-          <input type="text" id="foreperson" placeholder="Foreperson's Name"
-                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          <input id="foreperson" type="text" placeholder="Foreperson's Name"
+                 class="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
         </div>
       </div>
     </div>
@@ -90,23 +91,23 @@
           <tbody id="crew-table-body"></tbody>
         </table>
       </div>
-      <div class="flex justify-start mt-4 no-print">
+
+      <div class="flex justify-start mt-4 gap-3 no-print">
         <button id="add-row-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
           + Add Crew Member
         </button>
+        <button id="generate-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
+          Generate PDF
+        </button>
+        <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold py-2 px-4 rounded-lg shadow hover:shadow-lg">
+          Print (Browser)
+        </button>
       </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="mt-6 flex justify-end space-x-4 no-print">
-      <button id="generate-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
-        Generate PDF
-      </button>
     </div>
   </div>
 
-  <!-- Signature Modal -->
-  <div id="signature-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
+  <!-- Signature modal -->
+  <div id="signature-modal" class="fixed inset-0 bg-gray-900/80 flex items-center justify-center hidden z-50 no-print">
     <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto">
       <h3 class="text-xl font-bold mb-4">Provide Signature</h3>
       <canvas id="signature-pad" width="400" height="200"></canvas>
@@ -117,8 +118,8 @@
     </div>
   </div>
 
-  <!-- Message Modal -->
-  <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
+  <!-- Message modal -->
+  <div id="message-modal" class="fixed inset-0 bg-gray-900/80 flex items-center justify-center hidden z-50 no-print">
     <div class="bg-white rounded-xl shadow-2xl p-8 w-11/12 max-w-md mx-auto text-center">
       <h3 id="message-title" class="text-2xl font-bold mb-4"></h3>
       <p id="message-text" class="text-gray-700 mb-6"></p>
@@ -126,12 +127,9 @@
     </div>
   </div>
 
-  <script type="module">
-    // --- Put the exact names to exclude (if any) here, e.g.:
-    // const SKIP_NAMES = new Set(['Lastname, Firstname', 'Another, Person']);
-    const SKIP_NAMES = new Set([]);
-
-    // --- The entire roster as pasted (tab-separated: Name\tSUNID\tClassification\tCamp|Town)
+  <script>
+    // ---------- ROSTER (paste additions here if you ever need more) ----------
+    // TSV: Name<TAB>Suncor ID<TAB>Classification<TAB>Camp/Town
     const ROSTER_TSV = `
 Campbell, Adam	90152831	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
 Jeong, Yeongcheol	90412650	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
@@ -390,30 +388,29 @@ McLellan, Michael	90132498	Quality Control Inspector II	Town
 Armstrong, Russell	347151	Quality Control Inspector II	Town
 `.trim();
 
-    // --- Parse embedded TSV into roster objects (dedupe by SUNID)
     function parseRoster(tsv) {
-      const lines = tsv.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-      const out = [];
-      for (const line of lines) {
+      return tsv.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => {
         const parts = line.split(/\t+/);
-        if (parts.length < 4) continue;
-        const [name, suncorId, classification, location] = parts.map(s => s.trim());
-        if (SKIP_NAMES.has(name)) continue;
-        out.push({ name, suncorId, classification, location });
-      }
-      // dedupe by SUNID
-      const byId = new Map();
-      for (const w of out) if (!byId.has(w.suncorId)) byId.set(w.suncorId, w);
-      return Array.from(byId.values());
+        const [name, suncorId, classification, location] = [parts[0], parts[1], parts[2], parts[3]];
+        return { name, suncorId, classification, location: (location || '').toLowerCase().includes('camp') ? 'Camp' : 'Town' };
+      });
     }
 
-    let crewRoster = parseRoster(ROSTER_TSV);
+    function uniqueAndSorted(roster) {
+      const seen = new Map(); // prefer unique by SUNID; fall back to name
+      roster.forEach(p => {
+        const key = p.suncorId && p.suncorId.trim() ? p.suncorId.trim() : p.name.toLowerCase();
+        if (!seen.has(key)) seen.set(key, p);
+      });
+      return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+    }
 
-    // ====== DOM refs
+    const crewRoster = uniqueAndSorted(parseRoster(ROSTER_TSV));
+
+    // ---------- DOM refs ----------
+    const dateInput = document.getElementById('date');
     const addRowBtn = document.getElementById('add-row-btn');
     const crewTableBody = document.getElementById('crew-table-body');
-    const generatePdfBtn = document.getElementById('generate-pdf-btn');
-    const dateInput = document.getElementById('date');
     const signatureModal = document.getElementById('signature-modal');
     const signaturePad = document.getElementById('signature-pad');
     const clearSignatureBtn = document.getElementById('clear-signature-btn');
@@ -422,8 +419,9 @@ Armstrong, Russell	347151	Quality Control Inspector II	Town
     const messageTitle = document.getElementById('message-title');
     const messageText = document.getElementById('message-text');
     const messageOkBtn = document.getElementById('message-ok-btn');
+    const generatePdfBtn = document.getElementById('generate-pdf-btn');
 
-    // ====== Signature pad logic
+    // ---------- Signature pad ----------
     const ctx = signaturePad.getContext('2d');
     let drawing = false;
     let currentRowForSignature = null;
@@ -432,186 +430,165 @@ Armstrong, Russell	347151	Quality Control Inspector II	Town
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
-      const t = evt.touches && evt.touches[0];
-      const clientX = t ? t.clientX : evt.clientX;
-      const clientY = t ? t.clientY : evt.clientY;
+      const clientX = evt.clientX || (evt.touches && evt.touches[0].clientX);
+      const clientY = evt.clientY || (evt.touches && evt.touches[0].clientY);
       return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
     }
     function startDrawing(e){ drawing = true; const p = getMousePos(signaturePad, e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
-    function draw(e){ if(!drawing) return; e.preventDefault(); const p = getMousePos(signaturePad, e); ctx.lineTo(p.x,p.y); ctx.strokeStyle='#333'; ctx.lineWidth=2; ctx.stroke(); }
-    function stopDrawing(){ drawing=false; ctx.beginPath(); }
-    function clearCanvas(){ ctx.clearRect(0,0,signaturePad.width,signaturePad.height); }
+    function draw(e){ if(!drawing) return; e.preventDefault(); const p = getMousePos(signaturePad, e); ctx.lineTo(p.x, p.y); ctx.strokeStyle='#333'; ctx.lineWidth=2; ctx.stroke(); }
+    function stopDrawing(){ drawing = false; ctx.beginPath(); }
+    function clearCanvas(){ ctx.clearRect(0,0,signaturePad.width, signaturePad.height); }
+
     function openSignatureModal(row){ currentRowForSignature=row; clearCanvas(); signatureModal.classList.remove('hidden'); }
     function closeSignatureModal(){ signatureModal.classList.add('hidden'); currentRowForSignature=null; }
-    function showMessage(title,text){ messageTitle.textContent=title; messageText.textContent=text; messageModal.classList.remove('hidden'); }
+    function showMessage(title, text){ messageTitle.textContent=title; messageText.textContent=text; messageModal.classList.remove('hidden'); }
 
-    // ====== UI helpers
-    const svgTrash = `
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0V5a2 2 0 012-2h2a2 2 0 012 2v2" />
-      </svg>`;
-
-    function buildNameSelect() {
-      const sel = document.createElement('select');
-      sel.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2 form-select';
-      const opt0 = document.createElement('option'); opt0.value=''; opt0.textContent='Select a worker...'; sel.appendChild(opt0);
-      const sorted = [...crewRoster].sort((a,b)=>a.name.localeCompare(b.name));
-      for (const w of sorted) {
-        const o = document.createElement('option');
-        o.value = w.name;
-        o.textContent = w.name;
-        sel.appendChild(o);
-      }
-      const optAdd = document.createElement('option'); optAdd.value='_addNew_'; optAdd.textContent='--- Add New Worker ---';
-      sel.appendChild(optAdd);
-      return sel;
+    // ---------- Table row builder ----------
+    function makeTrashIcon() {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2m-9 0h10" />
+        </svg>`;
     }
 
     function addCrewRow() {
-      const rowId = `row-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
       const mainRow = document.createElement('tr');
       const subRow  = document.createElement('tr');
-      mainRow.id = rowId;
       mainRow.className = 'bg-white hover:bg-gray-50 align-middle main-row';
       subRow.className  = 'bg-white hover:bg-gray-50 align-middle sub-row';
 
       mainRow.innerHTML = `
         <td class="px-4 py-2">
           <input type="text" placeholder="e.g., Unit 5"
-            class="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2">
+                 class="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2">
         </td>
         <td class="px-4 py-2">
           <div class="flex items-center gap-2">
-            <div class="flex-1 name-cell"></div>
-            <button class="remove-row no-print text-red-600 hover:text-red-700 p-1 rounded" title="Remove row">
-              ${svgTrash}
+            <select class="flex-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2 form-select worker-select"></select>
+            <button class="icon-btn text-red-600 remove-row-btn" title="Remove row" aria-label="Remove row">
+              ${makeTrashIcon()}
             </button>
           </div>
         </td>
         <td class="px-4 py-2">
           <input type="text" data-field="suncorId" placeholder="Suncor ID"
-            class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
+                 class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
         </td>
         <td class="px-4 py-2">
           <input type="text" data-field="classification" placeholder="Classification"
-            class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
-        </td>`;
+                 class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
+        </td>
+      `;
 
       subRow.innerHTML = `
         <td colspan="4">
-          <div class="flex items-center space-x-4 pl-2">
+          <div class="flex items-center gap-4 pl-2">
             <div class="signature-cell text-center">
               <button class="sign-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded">Sign</button>
             </div>
-            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Late:</label><input type="checkbox" data-field="isLate" class="form-checkbox"></div>
-            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Absent:</label><input type="checkbox" data-field="isAbsent" class="form-checkbox"></div>
-            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Training:</label><input type="checkbox" data-field="isTraining" class="form-checkbox"></div>
-            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Camp:</label><input type="checkbox" data-field="isCamp" class="form-checkbox"></div>
-            <div class="flex items-center space-x-2"><label class="text-xs font-medium">Town:</label><input type="checkbox" data-field="isTown" class="form-checkbox"></div>
+            <label class="text-xs font-medium inline-flex items-center gap-2">Late:<input type="checkbox" data-field="isLate"></label>
+            <label class="text-xs font-medium inline-flex items-center gap-2">Absent:<input type="checkbox" data-field="isAbsent"></label>
+            <label class="text-xs font-medium inline-flex items-center gap-2">Training:<input type="checkbox" data-field="isTraining"></label>
+            <label class="text-xs font-medium inline-flex items-center gap-2">Camp:<input type="checkbox" data-field="isCamp"></label>
+            <label class="text-xs font-medium inline-flex items-center gap-2">Town:<input type="checkbox" data-field="isTown"></label>
           </div>
-        </td>`;
+        </td>
+      `;
 
-      crewTableBody.appendChild(mainRow);
-      crewTableBody.appendChild(subRow);
+      // Fill select options
+      const select = mainRow.querySelector('.worker-select');
+      const defaultOpt = new Option('Select a worker…', '', true, false);
+      select.add(defaultOpt);
+      crewRoster.forEach(w => select.add(new Option(w.name, w.name)));
+      select.add(new Option('— Add New Worker —', '_addNew_'));
 
-      const nameCell = mainRow.querySelector('.name-cell');
-      const nameSelect = buildNameSelect();
-      nameCell.appendChild(nameSelect);
-
+      // Wire up events
+      mainRow.querySelector('.remove-row-btn').addEventListener('click', () => {
+        mainRow.remove(); subRow.remove();
+      });
       subRow.querySelector('.sign-btn').addEventListener('click', () => openSignatureModal(subRow));
-      mainRow.querySelector('.remove-row').addEventListener('click', () => { mainRow.remove(); subRow.remove(); });
 
-      nameSelect.addEventListener('change', (e) => handleNameSelection(e, mainRow, subRow));
+      select.addEventListener('change', e => handleNameSelection(e, mainRow, subRow));
+
+      crewTableBody.append(mainRow, subRow);
     }
 
     function handleNameSelection(e, mainRow, subRow) {
-      const selectedValue = e.target.value;
+      const value = e.target.value;
       const suncorIdInput = mainRow.querySelector('input[data-field="suncorId"]');
-      const classInput   = mainRow.querySelector('input[data-field="classification"]');
-      const campCheckbox = subRow.querySelector('input[data-field="isCamp"]');
-      const townCheckbox = subRow.querySelector('input[data-field="isTown"]');
+      const classInput = mainRow.querySelector('input[data-field="classification"]');
+      const campCb = subRow.querySelector('input[data-field="isCamp"]');
+      const townCb = subRow.querySelector('input[data-field="isTown"]');
 
-      if (selectedValue === '_addNew_') {
-        const textInput = document.createElement('input');
-        textInput.type = 'text';
-        textInput.placeholder = 'First/Last Name';
-        textInput.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2';
-        e.target.replaceWith(textInput);
-        textInput.focus();
+      if (value === '_addNew_') {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'First/Last Name';
+        input.className = 'flex-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2';
+        e.target.replaceWith(input);
+        input.focus();
 
-        suncorIdInput.value = '';
-        classInput.value = '';
         suncorIdInput.readOnly = false; classInput.readOnly = false;
         suncorIdInput.classList.remove('bg-gray-100'); classInput.classList.remove('bg-gray-100');
-        campCheckbox.checked = false; townCheckbox.checked = false;
-        campCheckbox.disabled = false; townCheckbox.disabled = false;
+        suncorIdInput.value = ''; classInput.value = '';
+        campCb.checked=false; townCb.checked=false; campCb.disabled=false; townCb.disabled=false;
         return;
       }
 
-      const w = crewRoster.find(x => x.name === selectedValue);
-      if (w) {
-        suncorIdInput.value = w.suncorId || '';
-        classInput.value = w.classification || '';
+      const worker = crewRoster.find(w => w.name === value);
+      if (worker) {
+        suncorIdInput.value = worker.suncorId || '';
+        classInput.value = worker.classification || '';
         suncorIdInput.readOnly = true; classInput.readOnly = true;
         suncorIdInput.classList.add('bg-gray-100'); classInput.classList.add('bg-gray-100');
-        campCheckbox.checked = (w.location || '').toLowerCase() === 'camp';
-        townCheckbox.checked = (w.location || '').toLowerCase() === 'town';
-        campCheckbox.disabled = true; townCheckbox.disabled = true;
+        const isCamp = (worker.location || '').toLowerCase()==='camp';
+        campCb.checked = isCamp; townCb.checked = !isCamp;
+        campCb.disabled = true; townCb.disabled = true;
       } else {
-        suncorIdInput.value = ''; classInput.value = '';
-        suncorIdInput.readOnly = false; classInput.readOnly = false;
+        suncorIdInput.value=''; classInput.value='';
+        suncorIdInput.readOnly=false; classInput.readOnly=false;
         suncorIdInput.classList.remove('bg-gray-100'); classInput.classList.remove('bg-gray-100');
-        campCheckbox.checked = false; townCheckbox.checked = false;
-        campCheckbox.disabled = false; townCheckbox.disabled = false;
+        campCb.checked=false; townCb.checked=false; campCb.disabled=false; townCb.disabled=false;
       }
     }
 
-    // PDF generation
+    // ---------- PDF / Print ----------
     function handlePdfGeneration() {
-      const projectInput = document.getElementById('project');
-      if (!projectInput.value.trim()) {
-        showMessage('Cannot Generate PDF', 'Please enter a Project / Job # before generating the PDF.');
-        return;
-      }
-      const element = document.getElementById('form-container');
-      const file = `${projectInput.value.replace(/[^a-z0-9]/gi,'_')}_${dateInput.value}.pdf`;
-      const opt = {
-        margin: .25, filename: file,
-        image: { type:'jpeg', quality:.98 },
-        html2canvas: { scale:2, useCORS:true },
-        jsPDF: { unit:'in', format:'letter', orientation:'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
+      const project = document.getElementById('project').value.trim();
+      const dateVal = document.getElementById('date').value;
+      if (!project) { showMessage('Cannot Generate PDF', 'Please enter a Project / Job # before generating the PDF.'); return; }
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) { window.print(); return; }
+
+      const el = document.getElementById('form-container');
+      const filename = `${project.replace(/[^a-z0-9]/gi,'_')}_${dateVal || 'today'}.pdf`;
+      html2pdf().set({
+        margin: 0.25,
+        filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      }).from(el).save();
     }
 
-    // Events
+    // ---------- Events / init ----------
     dateInput.valueAsDate = new Date();
-    document.getElementById('add-row-btn').addEventListener('click', addCrewRow);
-    document.getElementById('generate-pdf-btn').addEventListener('click', handlePdfGeneration);
+    addRowBtn.addEventListener('click', addCrewRow);
+    generatePdfBtn.addEventListener('click', handlePdfGeneration);
+    clearSignatureBtn.addEventListener('click', clearCanvas);
+    messageOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
 
-    const signaturePadEl = document.getElementById('signature-pad');
-    signaturePadEl.addEventListener('mousedown', startDrawing);
-    signaturePadEl.addEventListener('mousemove', draw);
-    signaturePadEl.addEventListener('mouseup', stopDrawing);
-    signaturePadEl.addEventListener('mouseleave', stopDrawing);
-    signaturePadEl.addEventListener('touchstart', startDrawing, { passive:false });
-    signaturePadEl.addEventListener('touchmove', draw, { passive:false });
-    signaturePadEl.addEventListener('touchend', stopDrawing, { passive:false });
+    signaturePad.addEventListener('mousedown', startDrawing);
+    signaturePad.addEventListener('mousemove', draw);
+    signaturePad.addEventListener('mouseup', stopDrawing);
+    signaturePad.addEventListener('mouseleave', stopDrawing);
+    signaturePad.addEventListener('touchstart', startDrawing, { passive:false });
+    signaturePad.addEventListener('touchmove', draw, { passive:false });
+    signaturePad.addEventListener('touchend', stopDrawing, { passive:false });
 
-    document.getElementById('clear-signature-btn').addEventListener('click', clearCanvas);
-    document.getElementById('save-signature-btn').addEventListener('click', () => {
-      if (!currentRowForSignature) return;
-      const signatureDataUrl = signaturePad.toDataURL('image/png');
-      const signatureCell = currentRowForSignature.querySelector('.signature-cell');
-      const img = document.createElement('img');
-      img.src = signatureDataUrl; img.classList.add('signature-image');
-      signatureCell.innerHTML = ''; signatureCell.appendChild(img);
-      closeSignatureModal();
-    });
-    document.getElementById('message-ok-btn').addEventListener('click', () => messageModal.classList.add('hidden'));
-
-    // Start with one blank row
+    // First blank row ready to go
     addCrewRow();
   </script>
 </body>
