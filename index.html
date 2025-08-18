@@ -9,66 +9,25 @@
     <!-- PDF Generation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        #signature-pad {
-            border: 2px dashed #cbd5e1;
-            border-radius: 0.5rem;
-            cursor: crosshair;
-        }
-        ::placeholder {
-            color: #94a3b8;
-        }
-        input[type="checkbox"] {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
-        input[type="checkbox"]:disabled {
-            background-color: #e5e7eb;
-            border-color: #d1d5db;
-            cursor: not-allowed;
-        }
-        button {
-            transition: all 0.2s ease-in-out;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        #signature-pad { border: 2px dashed #cbd5e1; border-radius: 0.5rem; cursor: crosshair; }
+        ::placeholder { color: #94a3b8; }
+        input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
+        input[type="checkbox"]:disabled { background-color: #e5e7eb; border-color: #d1d5db; cursor: not-allowed; }
+        button { transition: all 0.2s ease-in-out; }
         .form-select {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
+            background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em;
+            padding-right: 2.5rem; -webkit-appearance: none; -moz-appearance: none; appearance: none;
         }
-        .signature-image {
-            height: 40px;
-            width: 120px;
-            object-fit: contain;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.25rem;
-        }
-        /* Styles for the new sub-row */
-        .sub-row td {
-            padding-top: 0.5rem;
-            padding-bottom: 1rem;
-            padding-left: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .main-row td {
-            padding-bottom: 0;
-            border-bottom: none;
-        }
+        .signature-image { height: 40px; width: 120px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 0.25rem; }
+        .sub-row td { padding-top: 0.5rem; padding-bottom: 1rem; padding-left: 1rem; border-bottom: 1px solid #e5e7eb; }
+        .main-row td { padding-bottom: 0; border-bottom: none; }
+
         /* Hide elements when printing */
         @media print {
-            .no-print {
-                display: none !important;
-            }
-            @page {
-                size: letter portrait;
-                margin: 0.5in;
-            }
+            .no-print { display: none !important; }
+            @page { size: letter portrait; margin: 0.5in; }
         }
     </style>
 </head>
@@ -104,7 +63,7 @@
                     <label for="supervisor" class="text-sm font-medium text-gray-600 mb-1">Supervisor</label>
                     <input type="text" id="supervisor" placeholder="Supervisor's Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 </div>
-                 <div class="flex flex-col">
+                <div class="flex flex-col">
                     <label for="foreperson" class="text-sm font-medium text-gray-600 mb-1">Foreperson</label>
                     <input type="text" id="foreperson" placeholder="Foreperson's Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 </div>
@@ -138,7 +97,7 @@
 
         <!-- Submission Section -->
         <div class="mt-6 flex justify-end space-x-4 no-print">
-             <button id="generate-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
+            <button id="generate-pdf-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl">
                 Generate PDF
             </button>
         </div>
@@ -300,55 +259,18 @@
             const scaleY = canvas.height / rect.height;
             const clientX = evt.clientX || (evt.touches && evt.touches[0].clientX);
             const clientY = evt.clientY || (evt.touches && evt.touches[0].clientY);
-            return {
-                x: (clientX - rect.left) * scaleX,
-                y: (clientY - rect.top) * scaleY
-            };
+            return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
         }
 
-        function startDrawing(e) {
-            drawing = true;
-            const pos = getMousePos(signaturePad, e);
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-        }
-
-        function draw(e) {
-            if (!drawing) return;
-            e.preventDefault();
-            const pos = getMousePos(signaturePad, e);
-            ctx.lineTo(pos.x, pos.y);
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-
-        function stopDrawing() {
-            drawing = false;
-            ctx.beginPath();
-        }
-        
-        function clearCanvas() {
-            ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
-        }
+        function startDrawing(e) { drawing = true; const pos = getMousePos(signaturePad, e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+        function draw(e) { if (!drawing) return; e.preventDefault(); const pos = getMousePos(signaturePad, e); ctx.lineTo(pos.x, pos.y); ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke(); }
+        function stopDrawing() { drawing = false; ctx.beginPath(); }
+        function clearCanvas() { ctx.clearRect(0, 0, signaturePad.width, signaturePad.height); }
 
         // --- MODAL & UI LOGIC ---
-        function openSignatureModal(row) {
-            currentRowForSignature = row;
-            clearCanvas();
-            signatureModal.classList.remove('hidden');
-        }
-
-        function closeSignatureModal() {
-            signatureModal.classList.add('hidden');
-            currentRowForSignature = null;
-        }
-        
-        function showMessage(title, text) {
-            messageTitle.textContent = title;
-            messageText.textContent = text;
-            messageModal.classList.remove('hidden');
-        }
+        function openSignatureModal(row) { currentRowForSignature = row; clearCanvas(); signatureModal.classList.remove('hidden'); }
+        function closeSignatureModal() { signatureModal.classList.add('hidden'); currentRowForSignature = null; }
+        function showMessage(title, text) { messageTitle.textContent = title; messageText.textContent = text; messageModal.classList.remove('hidden'); }
 
         // --- DATA & TABLE LOGIC ---
         function addCrewRow() {
@@ -361,10 +283,16 @@
             subRow.className = 'bg-white hover:bg-gray-50 align-middle sub-row';
             
             mainRow.innerHTML = `
-                <td class="px-4 py-2"><input type="text" placeholder="e.g., Unit 5" class="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2"></td>
+                <td class="px-4 py-2">
+                    <input type="text" placeholder="e.g., Unit 5" class="w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2">
+                </td>
                 <td class="px-4 py-2 name-cell-container"></td>
-                <td class="px-4 py-2"><input type="text" data-field="suncorId" placeholder="Suncor ID" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly></td>
-                <td class="px-4 py-2"><input type="text" data-field="classification" placeholder="Classification" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly></td>
+                <td class="px-4 py-2">
+                    <input type="text" data-field="suncorId" placeholder="Suncor ID" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
+                </td>
+                <td class="px-4 py-2">
+                    <input type="text" data-field="classification" placeholder="Classification" class="w-full bg-gray-100 border-b border-gray-300 focus:outline-none p-2" readonly>
+                </td>
             `;
             
             subRow.innerHTML = `
@@ -383,10 +311,14 @@
                 </td>
             `;
 
+            // Build the Name cell with a select + inline trash button
             const nameCellContainer = mainRow.querySelector('.name-cell-container');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex items-center gap-2';
+
             const nameSelect = document.createElement('select');
-            nameSelect.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2 form-select';
-            
+            nameSelect.className = 'flex-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2 form-select';
+
             let defaultOption = document.createElement('option');
             defaultOption.textContent = 'Select a worker...';
             defaultOption.value = '';
@@ -403,17 +335,30 @@
             addNewOption.textContent = '--- Add New Worker ---';
             addNewOption.value = '_addNew_';
             nameSelect.appendChild(addNewOption);
-            
-            nameCellContainer.appendChild(nameSelect);
-            
+
+            // Trash icon button (inline)
+            const deleteInlineBtn = document.createElement('button');
+            deleteInlineBtn.type = 'button';
+            deleteInlineBtn.className = 'no-print p-2 rounded hover:bg-red-50';
+            deleteInlineBtn.title = 'Remove this crew member';
+            deleteInlineBtn.setAttribute('aria-label', 'Remove this crew member');
+            deleteInlineBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 hover:text-red-700" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 100 2h.278l.84 9.243A3 3 0 008.107 18h3.786a3 3 0 002.99-2.757L15.722 6H16a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM8 8a1 1 0 112 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"/>
+                </svg>
+            `;
+
+            wrapper.appendChild(nameSelect);
+            wrapper.appendChild(deleteInlineBtn);
+            nameCellContainer.appendChild(wrapper);
+
             crewTableBody.appendChild(mainRow);
             crewTableBody.appendChild(subRow);
-            
+
+            // Events
+            deleteInlineBtn.addEventListener('click', () => { mainRow.remove(); subRow.remove(); });
             subRow.querySelector('.sign-btn').addEventListener('click', () => openSignatureModal(subRow));
-            subRow.querySelector('.delete-row-btn').addEventListener('click', () => {
-                mainRow.remove();
-                subRow.remove();
-            });
+            subRow.querySelector('.delete-row-btn').addEventListener('click', () => { mainRow.remove(); subRow.remove(); });
             nameSelect.addEventListener('change', (e) => handleNameSelection(e, mainRow, subRow));
         }
 
@@ -425,20 +370,21 @@
             const townCheckbox = subRow.querySelector('input[data-field="isTown"]');
 
             if (selectedValue === '_addNew_') {
+                // Swap the select for a free-text input, keep the inline trash button
                 const textInput = document.createElement('input');
                 textInput.type = 'text';
                 textInput.placeholder = 'First/Last Name';
-                textInput.className = 'w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2';
+                textInput.className = 'flex-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 p-2';
                 e.target.replaceWith(textInput);
                 textInput.focus();
-                
+
                 suncorIdInput.value = '';
                 classInput.value = '';
                 suncorIdInput.readOnly = false;
                 classInput.readOnly = false;
                 suncorIdInput.classList.remove('bg-gray-100');
                 classInput.classList.remove('bg-gray-100');
-                
+
                 campCheckbox.checked = false;
                 townCheckbox.checked = false;
                 campCheckbox.disabled = false;
@@ -484,25 +430,20 @@
                 return;
             }
 
-            // --- Device Detection ---
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
             if (isIOS) {
-                // Use the reliable window.print() method for iOS devices
                 window.print();
             } else {
-                // Use html2pdf for all other devices (Desktop, Android, etc.)
                 const element = document.getElementById('form-container');
                 const filename = `${projectInput.value.replace(/[^a-z0-9]/gi, '_')}_${dateInput.value}.pdf`;
-                
                 const opt = {
-                    margin:       0.25,
-                    filename:     filename,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    margin: 0.25,
+                    filename,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
-
                 html2pdf().set(opt).from(element).save();
             }
         }
@@ -517,16 +458,12 @@
         saveSignatureBtn.addEventListener('click', () => {
             if (!currentRowForSignature) return;
             const signatureDataUrl = signaturePad.toDataURL('image/png');
-            
             const signatureCell = currentRowForSignature.querySelector('.signature-cell');
-            
             const sigImage = document.createElement('img');
             sigImage.src = signatureDataUrl;
             sigImage.classList.add('signature-image');
-            
             signatureCell.innerHTML = '';
             signatureCell.appendChild(sigImage);
-
             closeSignatureModal();
         });
 
@@ -538,6 +475,7 @@
         signaturePad.addEventListener('touchmove', draw, { passive: false });
         signaturePad.addEventListener('touchend', stopDrawing, { passive: false });
 
+        // Add first blank row
         addCrewRow();
     </script>
 
