@@ -33,12 +33,14 @@
     <!-- Header -->
     <div class="bg-white p-6 rounded-xl shadow-md mb-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-        <!-- EXACT CAM LOGO (base64-inlined PNG) -->
+        <!-- Embedded CAM logo (crisp, no external URL needed) -->
         <img
-          class="h-12 sm:h-14 object-contain"
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUYAAABgCAYAAABhVdtvAABGzUlEQVR42u2dd5hU1f3/X+fcO3UbuyxF..."
           alt="CAM Industrial Solutions Logo"
-          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAm8AAAC3CAYAAABExLnjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8...SNIPPED_FOR_LENGTH..."/>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Digital Attendance Sheet</h1>
+          class="h-12 sm:h-14 object-contain"
+          style="max-width: 360px"
+        />
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Digital Attendance Sheet</h1>
       </div>
 
       <!-- Header info -->
@@ -129,10 +131,9 @@
   </div>
 
   <script type="module">
-    // --- Exclude specific names here if ever needed (leave empty to keep all)
-    const SKIP_NAMES = new Set([]);
+    /* ---------- Roster (paste you sent) ---------- */
+    const SKIP_NAMES = new Set([]); // Add exact names here to exclude if ever needed
 
-    // --- Entire roster (tab-separated: Name \t SUNID \t Classification \t Camp|Town)
     const ROSTER_TSV = `
 Campbell, Adam	90152831	Iron Worker (ST) Journeyman | 10-JM-S-A	Camp
 Jeong, Yeongcheol	90412650	Pipefitter Journeyman Alloy Welder | 16-JMAW-S-B	Camp
@@ -391,7 +392,6 @@ McLellan, Michael	90132498	Quality Control Inspector II	Town
 Armstrong, Russell	347151	Quality Control Inspector II	Town
 `.trim();
 
-    // --- Parse TSV -> objects (dedupe by SUNID)
     function parseRoster(tsv) {
       const lines = tsv.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       const out = [];
@@ -406,7 +406,6 @@ Armstrong, Russell	347151	Quality Control Inspector II	Town
       for (const w of out) if (!byId.has(w.suncorId)) byId.set(w.suncorId, w);
       return Array.from(byId.values());
     }
-
     let crewRoster = parseRoster(ROSTER_TSV);
 
     // ====== DOM refs
